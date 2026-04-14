@@ -1,42 +1,34 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 import os
-from dotenv import load_dotenv
-
-# Load .env file
-load_dotenv()
 
 # ======================
-# DATABASE URL
+# DATABASE URL (Vercel / Local safe)
 # ======================
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if not DATABASE_URL:
-    print("WARNING: DATABASE_URL is missing")
-
-
 # ======================
-# Engine
+# Engine (SAFE INIT)
 # ======================
 
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,
-    connect_args={"sslmode": "require"}   # เพิ่มอันนี้สำหรับ Supabase
-)
+engine = None
+SessionLocal = None
 
+if DATABASE_URL:
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,
+        connect_args={"sslmode": "require"}
+    )
 
-# ======================
-# Session
-# ======================
-
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
-)
-
+    SessionLocal = sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=engine
+    )
+else:
+    print("⚠️ WARNING: DATABASE_URL is missing (check Vercel env)")
 
 # ======================
 # Base Model
@@ -44,12 +36,14 @@ SessionLocal = sessionmaker(
 
 Base = declarative_base()
 
-
 # ======================
 # Dependency
 # ======================
 
 def get_db():
+    if SessionLocal is None:
+        raise Exception("Database not initialized: DATABASE_URL missing")
+
     db: Session = SessionLocal()
     try:
         yield db
