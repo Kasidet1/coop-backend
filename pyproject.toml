@@ -1,4 +1,13 @@
 [project]
 name = "coop-backend"
 version = "0.1.0"
-dependencies = []
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "sqlalchemy",
+    "python-dotenv",
+    "psycopg2-binary",
+    "python-jose",
+    "passlib[bcrypt]",
+    "python-multipart"
+]
