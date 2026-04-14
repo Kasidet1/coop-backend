@@ -1,23 +1,21 @@
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
-from . import schemas
-from .database import engine, Base, get_db
-from . import models, crud
-from .auth import create_access_token
-from .auth import get_current_user
-from .auth import require_role
 import shutil
 import os
 
+from . import schemas, models, crud
+from .database import get_db
+from .auth import create_access_token, get_current_user, require_role
+
 app = FastAPI()
 
-Base.metadata.create_all(bind=engine)
-
+# ======================
+# ROOT
+# ======================
 
 @app.get("/")
 def root():
     return {"message": "Coop backend"}
-
 
 # ======================
 # STUDENTS (Admin Only)
@@ -58,7 +56,6 @@ def delete_student(
 ):
     return crud.delete_student(db, student_id)
 
-
 # ======================
 # AUTH
 # ======================
@@ -77,10 +74,7 @@ def login(user: schemas.Login, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     access_token = create_access_token(
-        data={
-            "sub": db_user.email,
-            "role": db_user.role
-        }
+        data={"sub": db_user.email, "role": db_user.role}
     )
 
     return {
@@ -88,16 +82,12 @@ def login(user: schemas.Login, db: Session = Depends(get_db)):
         "role": db_user.role
     }
 
-
 # ======================
 # STUDENT LOGIN
 # ======================
 
 @app.post("/student/login")
-def student_login(
-    data: schemas.StudentLogin,
-    db: Session = Depends(get_db)
-):
+def student_login(data: schemas.StudentLogin, db: Session = Depends(get_db)):
 
     student = crud.student_login(
         db,
@@ -109,17 +99,13 @@ def student_login(
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     access_token = create_access_token(
-        data={
-            "sub": student.student_id,
-            "role": "student"
-        }
+        data={"sub": student.student_id, "role": "student"}
     )
 
     return {
         "access_token": access_token,
         "role": "student"
     }
-
 
 # ======================
 # APPLICATION
@@ -159,13 +145,11 @@ def reject_application(
 ):
     return crud.update_application_status(db, application_id, "rejected")
 
-
 # ======================
-# Upload PDF
+# UPLOAD PDF
 # ======================
 
 UPLOAD_DIR = "uploads"
-
 
 @app.post("/upload-pdf")
 def upload_pdf(
@@ -174,19 +158,17 @@ def upload_pdf(
     user=Depends(get_current_user)
 ):
 
-    if not os.path.exists(UPLOAD_DIR):
-        os.makedirs(UPLOAD_DIR)
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-    file_path = f"{UPLOAD_DIR}/{file.filename}"
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
 
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
     return {"filename": file.filename}
 
-
 # ======================
-# SUPERVISION (Teacher)
+# SUPERVISION
 # ======================
 
 @app.post("/supervision")
@@ -205,9 +187,8 @@ def read_supervision(
 ):
     return crud.get_supervisions(db)
 
-
 # ======================
-# TEACHER STUDENTS
+# TEACHER
 # ======================
 
 @app.get("/teacher/students")
@@ -218,8 +199,15 @@ def teacher_students(
     return crud.get_teacher_students(db, user["sub"])
 
 
+@app.get("/teacher/dashboard")
+def teacher_dashboard(
+    db: Session = Depends(get_db),
+    user=Depends(require_role("teacher"))
+):
+    return crud.teacher_dashboard(db, user["sub"])
+
 # ======================
-# ADMIN DASHBOARD
+# ADMIN
 # ======================
 
 @app.get("/admin/dashboard")
@@ -228,19 +216,6 @@ def admin_dashboard(
     user=Depends(require_role("admin"))
 ):
     return crud.admin_dashboard(db)
-
-
-# ======================
-# TEACHER DASHBOARD
-# ======================
-
-@app.get("/teacher/dashboard")
-def teacher_dashboard(
-    db: Session = Depends(get_db),
-    user=Depends(require_role("teacher"))
-):
-    return crud.teacher_dashboard(db, user["sub"])
-
 
 # ======================
 # ASSIGN TEACHER
@@ -252,15 +227,10 @@ def assign_teacher(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
-    return crud.assign_teacher(
-        db,
-        data.student_id,
-        data.teacher_id
-    )
-
+    return crud.assign_teacher(db, data.student_id, data.teacher_id)
 
 # ======================
-# COMPANY CRUD
+# COMPANIES
 # ======================
 
 @app.post("/companies")
