@@ -15,5 +15,10 @@ dependencies = [
 ]
 
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+
+# 🔥 เพิ่มส่วนนี้เพื่อแก้ error api + app
+[tool.setuptools]
+packages = ["app"]
