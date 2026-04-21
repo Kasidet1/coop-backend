@@ -1,42 +1,68 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker, declarative_base, Session
+from dotenv import load_dotenv
 import os
 
-# =========================
-# ENV
-# =========================
+# ======================
+# Load .env
+# ======================
+
+load_dotenv()
+
+# ======================
+# DATABASE URL
+# ======================
+
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if not DATABASE_URL:
-    raise Exception("❌ DATABASE_URL is missing (check Vercel Environment Variables)")
+# ======================
+# Engine (SAFE INIT)
+# ======================
 
-# =========================
-# ENGINE
-# =========================
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True
-)
+engine = None
+SessionLocal = None
 
-# =========================
-# SESSION
-# =========================
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
-)
+if DATABASE_URL:
 
-# =========================
-# BASE MODEL
-# =========================
+    # SQLite (Local Dev)
+    if DATABASE_URL.startswith("sqlite"):
+        engine = create_engine(
+            DATABASE_URL,
+            connect_args={"check_same_thread": False}
+        )
+
+    # PostgreSQL / Supabase / Vercel
+    else:
+        engine = create_engine(
+            DATABASE_URL,
+            pool_pre_ping=True,
+            connect_args={"sslmode": "require"}
+        )
+
+    SessionLocal = sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=engine
+    )
+
+else:
+    print("⚠️ WARNING: DATABASE_URL is missing (check .env / Vercel env)")
+
+# ======================
+# Base Model
+# ======================
+
 Base = declarative_base()
 
-# =========================
-# DEPENDENCY (FastAPI)
-# =========================
+# ======================
+# Dependency
+# ======================
+
 def get_db():
-    db = SessionLocal()
+    if SessionLocal is None:
+        raise Exception("Database not initialized: DATABASE_URL missing")
+
+    db: Session = SessionLocal()
     try:
         yield db
     finally:
