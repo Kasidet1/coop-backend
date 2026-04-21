@@ -8,7 +8,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 SECRET_KEY = "supersecretkey"
 ALGORITHM = "HS256"
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
 
 security = HTTPBearer()
 
@@ -38,7 +38,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
 
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
-    
+
 
 def require_role(required_role: str):
     def role_checker(user = Depends(get_current_user)):
