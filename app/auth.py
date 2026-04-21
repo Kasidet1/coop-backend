@@ -14,11 +14,11 @@ security = HTTPBearer()
 
 
 def hash_password(password: str):
-    return pwd_context.hash(password[:72])
+    return pwd_context.hash(password)
 
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password[:72], hashed_password)
+    return pwd_context.verify(plain_password, hashed_password)
 
 
 def create_access_token(data: dict):
@@ -39,6 +39,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
     
+
 def require_role(required_role: str):
     def role_checker(user = Depends(get_current_user)):
         if user["role"] != required_role:
