@@ -8,7 +8,11 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 SECRET_KEY = "supersecretkey"
 ALGORITHM = "HS256"
 
-pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
+# แก้ตรงนี้
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
 
 security = HTTPBearer()
 
