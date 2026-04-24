@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import shutil
 import os
@@ -8,6 +9,24 @@ from .database import get_db
 from .auth import create_access_token, get_current_user, require_role
 
 app = FastAPI()
+
+# ======================
+# CORS (สำคัญมาก)
+# ======================
+
+origins = [
+    "http://localhost:5174",  # frontend ตอน dev
+    # ใส่ domain frontend จริงตอน deploy เช่น:
+    # "https://your-frontend.vercel.app"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,   # หรือ ["*"] ตอน dev
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ======================
 # ROOT
