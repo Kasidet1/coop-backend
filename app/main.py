@@ -11,21 +11,15 @@ from .auth import create_access_token, get_current_user, require_role
 app = FastAPI()
 
 # ======================
-# CORS (สำคัญมาก)
+# CORS (เปิดทั้งหมด)
 # ======================
-
-origins = [
-    "http://localhost:5174",  # frontend ตอน dev
-    # ใส่ domain frontend จริงตอน deploy เช่น:
-    # "https://your-frontend.vercel.app"
-]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,   # หรือ ["*"] ตอน dev
+    allow_origins=["*"],   # 👈 อนุญาตทุก origin
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],   # 👈 ทุก method (GET, POST, PUT, DELETE)
+    allow_headers=["*"],   # 👈 ทุก header
 )
 
 # ======================
