@@ -106,6 +106,9 @@ def login_user(db, email, password):
     if not user:
         return None
 
+    if not user.password:   # 👈 กัน null
+        return None
+
     if not verify_password(password, user.password):
         return None
 
@@ -123,6 +126,9 @@ def student_login(db, student_id, password):
     ).first()
 
     if not student:
+        return None
+
+    if not student.password:   # 👈 กัน null (สำคัญมาก)
         return None
 
     if not verify_password(password, student.password):
@@ -166,7 +172,10 @@ def update_application_status(db, application_id, status):
     return application
 
 
+# ======================
 # Upload PDF
+# ======================
+
 def upload_application_file(db, application_id, file_path):
 
     application = db.query(models.Application).filter(
@@ -204,7 +213,6 @@ def get_supervisions(db):
 # ======================
 
 def get_teacher_students(db, teacher_id):
-
     return db.query(models.Student).filter(
         models.Student.teacher_id == teacher_id
     ).all()
