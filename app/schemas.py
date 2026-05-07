@@ -74,6 +74,7 @@ class Student(BaseModel):
     class Config:
         from_attributes = True
 
+
 # ======================
 # Teacher
 # ======================
@@ -113,6 +114,7 @@ class CompanyCreate(BaseModel):
     shuttle: str
     welfare: str
 
+
 class Company(BaseModel):
     id: int
     company_name: str
@@ -122,7 +124,7 @@ class Company(BaseModel):
     accommodation: str
     shuttle: str
     welfare: str
-    
+
     class Config:
         from_attributes = True
 
@@ -154,6 +156,10 @@ class Application(BaseModel):
 class SupervisionCreate(BaseModel):
     teacher_id: int
     student_id: int
+
+    # เพิ่ม company_id
+    company_id: int
+
     date: date
     type: str
     note: str
@@ -162,11 +168,38 @@ class SupervisionCreate(BaseModel):
 
 class Supervision(BaseModel):
     id: int
+
     teacher_id: int
     student_id: int
+    company_id: int
+
     date: date
     type: str
     note: str
+    status: str
+
+    class Config:
+        from_attributes = True
+
+
+# ======================
+# Teacher Supervision View
+# ======================
+
+class TeacherSupervision(BaseModel):
+
+    teacher_first_name: str
+    teacher_last_name: str
+
+    company_name: str
+    industry: str
+
+    student_id: str
+    student_first_name: str
+    student_last_name: str
+
+    date: date
+    type: str
     status: str
 
     class Config:
@@ -181,11 +214,13 @@ class AdminDashboard(BaseModel):
     students: int
     companies: int
     applications: int
+    supervisions: int
 
 
 class TeacherDashboard(BaseModel):
     students: int
-    supervisions: List[Supervision]
+    supervision_count: int
+    supervisions: List[TeacherSupervision]
 
 
 # ======================
