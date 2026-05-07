@@ -29,7 +29,9 @@ class Student(Base):
     last_name = Column(String)
     faculty = Column(String)
     major = Column(String)
-
+    email = Column(String)
+    phone = Column(String)
+    year = Column(String)
     password = Column(String)
 
     teacher_id = Column(Integer, ForeignKey("teachers.id"))
