@@ -41,6 +41,9 @@ class StudentCreate(BaseModel):
     last_name: str
     faculty: str
     major: str
+    email: str
+    phone: str
+    year: str
     teacher_id: Optional[int] = None
 
 
@@ -50,6 +53,9 @@ class StudentRegister(BaseModel):
     last_name: str
     faculty: str
     major: str
+    email: str
+    phone: str
+    year: str
     password: str
 
 
@@ -60,6 +66,9 @@ class Student(BaseModel):
     last_name: str
     faculty: str
     major: str
+    email: str
+    phone: str
+    year: str
     teacher_id: Optional[int] = None
 
     class Config:
