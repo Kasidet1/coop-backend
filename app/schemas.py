@@ -65,16 +65,6 @@ class Student(BaseModel):
     class Config:
         from_attributes = True
 
-
-# ======================
-# Student Login
-# ======================
-
-class StudentLogin(BaseModel):
-    student_id: str
-    password: str
-
-
 # ======================
 # Teacher
 # ======================
