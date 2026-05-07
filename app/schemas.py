@@ -102,7 +102,11 @@ class Company(BaseModel):
     company_name: str
     address: str
     industry: str
-
+    allowance: str
+    accommodation: str
+    shuttle: str
+    welfare: str
+    
     class Config:
         from_attributes = True
 
