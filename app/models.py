@@ -24,22 +24,34 @@ class Student(Base):
     __tablename__ = "students"
 
     id = Column(Integer, primary_key=True, index=True)
-    student_id = Column(String)
+
+    student_id = Column(String, unique=True)
     first_name = Column(String)
     last_name = Column(String)
+
     faculty = Column(String)
     major = Column(String)
-    email = Column(String)
+
+    email = Column(String, unique=True)
     phone = Column(String)
     year = Column(String)
+
     password = Column(String)
 
     teacher_id = Column(Integer, ForeignKey("teachers.id"))
 
     # relationship
     teacher = relationship("Teacher", back_populates="students")
-    applications = relationship("Application", back_populates="student")
-    supervisions = relationship("Supervision", back_populates="student")
+
+    applications = relationship(
+        "Application",
+        back_populates="student"
+    )
+
+    supervisions = relationship(
+        "Supervision",
+        back_populates="student"
+    )
 
 
 # ======================
@@ -50,15 +62,27 @@ class Company(Base):
     __tablename__ = "companies"
 
     id = Column(Integer, primary_key=True, index=True)
+
     company_name = Column(String)
     address = Column(String)
+
+    # สายงาน
     industry = Column(String)
+
     allowance = Column(String)
     accommodation = Column(String)
     shuttle = Column(String)
     welfare = Column(String)
-    
-    applications = relationship("Application", back_populates="company")
+
+    applications = relationship(
+        "Application",
+        back_populates="company"
+    )
+
+    supervisions = relationship(
+        "Supervision",
+        back_populates="company"
+    )
 
 
 # ======================
@@ -70,16 +94,30 @@ class Application(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    student_id = Column(Integer, ForeignKey("students.id"))
-    company_id = Column(Integer, ForeignKey("companies.id"))
+    student_id = Column(
+        Integer,
+        ForeignKey("students.id")
+    )
+
+    company_id = Column(
+        Integer,
+        ForeignKey("companies.id")
+    )
 
     status = Column(String, default="pending")
 
     # upload pdf
     file = Column(String)
 
-    student = relationship("Student", back_populates="applications")
-    company = relationship("Company", back_populates="applications")
+    student = relationship(
+        "Student",
+        back_populates="applications"
+    )
+
+    company = relationship(
+        "Company",
+        back_populates="applications"
+    )
 
 
 # ======================
@@ -90,15 +128,26 @@ class Teacher(Base):
     __tablename__ = "teachers"
 
     id = Column(Integer, primary_key=True, index=True)
-    teacher_id = Column(String)
+
+    teacher_id = Column(String, unique=True)
+
     first_name = Column(String)
     last_name = Column(String)
+
     faculty = Column(String)
-    email = Column(String)
+
+    email = Column(String, unique=True)
     phone = Column(String)
 
-    students = relationship("Student", back_populates="teacher")
-    supervisions = relationship("Supervision", back_populates="teacher")
+    students = relationship(
+        "Student",
+        back_populates="teacher"
+    )
+
+    supervisions = relationship(
+        "Supervision",
+        back_populates="teacher"
+    )
 
 
 # ======================
@@ -110,8 +159,21 @@ class Supervision(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    teacher_id = Column(Integer, ForeignKey("teachers.id"))
-    student_id = Column(Integer, ForeignKey("students.id"))
+    teacher_id = Column(
+        Integer,
+        ForeignKey("teachers.id")
+    )
+
+    student_id = Column(
+        Integer,
+        ForeignKey("students.id")
+    )
+
+    # เพิ่ม company_id
+    company_id = Column(
+        Integer,
+        ForeignKey("companies.id")
+    )
 
     date = Column(Date)
 
@@ -119,7 +181,21 @@ class Supervision(Base):
     type = Column(String)
 
     note = Column(String)
+
+    # pending / completed
     status = Column(String)
 
-    teacher = relationship("Teacher", back_populates="supervisions")
-    student = relationship("Student", back_populates="supervisions")
+    teacher = relationship(
+        "Teacher",
+        back_populates="supervisions"
+    )
+
+    student = relationship(
+        "Student",
+        back_populates="supervisions"
+    )
+
+    company = relationship(
+        "Company",
+        back_populates="supervisions"
+    )
