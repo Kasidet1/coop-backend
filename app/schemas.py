@@ -95,7 +95,7 @@ class Teacher(BaseModel):
     faculty: str
     email: str
     phone: str
-    
+
     class Config:
         from_attributes = True
 
@@ -108,7 +108,10 @@ class CompanyCreate(BaseModel):
     company_name: str
     address: str
     industry: str
-
+    allowance: str
+    accommodation: str
+    shuttle: str
+    welfare: str
 
 class Company(BaseModel):
     id: int
