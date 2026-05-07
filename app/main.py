@@ -94,32 +94,7 @@ def login(user: schemas.Login, db: Session = Depends(get_db)):
         "access_token": access_token,
         "role": db_user.role
     }
-
-# ======================
-# STUDENT LOGIN
-# ======================
-
-@app.post("/student/login")
-def student_login(data: schemas.StudentLogin, db: Session = Depends(get_db)):
-
-    student = crud.student_login(
-        db,
-        data.student_id,
-        data.password
-    )
-
-    if not student:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-
-    access_token = create_access_token(
-        data={"sub": student.student_id, "role": "student"}
-    )
-
-    return {
-        "access_token": access_token,
-        "role": "student"
-    }
-
+    
 # ======================
 # APPLICATION
 # ======================
