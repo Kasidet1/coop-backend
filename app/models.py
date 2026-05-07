@@ -94,6 +94,8 @@ class Teacher(Base):
     first_name = Column(String)
     last_name = Column(String)
     faculty = Column(String)
+    email = Column(String)
+    phone = Column(String)
 
     students = relationship("Student", back_populates="teacher")
     supervisions = relationship("Supervision", back_populates="teacher")
