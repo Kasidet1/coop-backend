@@ -83,6 +83,8 @@ class TeacherCreate(BaseModel):
     first_name: str
     last_name: str
     faculty: str
+    email: str
+    phone: str
 
 
 class Teacher(BaseModel):
@@ -91,7 +93,9 @@ class Teacher(BaseModel):
     first_name: str
     last_name: str
     faculty: str
-
+    email: str
+    phone: str
+    
     class Config:
         from_attributes = True
 
