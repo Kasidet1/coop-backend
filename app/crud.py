@@ -13,6 +13,7 @@ def get_students(db: Session):
 
 
 def create_student(db, student):
+
     new_student = models.Student(
         student_id=student.student_id,
         first_name=student.first_name,
@@ -33,6 +34,7 @@ def create_student(db, student):
 
 
 def create_student_user(db, student):
+
     hashed = hash_password(student.password)
 
     db_student = models.Student(
@@ -55,11 +57,13 @@ def create_student_user(db, student):
 
 
 def update_student(db, student_id, student):
+
     db_student = db.query(models.Student).filter(
         models.Student.id == student_id
     ).first()
 
     if db_student:
+
         db_student.student_id = student.student_id
         db_student.first_name = student.first_name
         db_student.last_name = student.last_name
@@ -77,6 +81,7 @@ def update_student(db, student_id, student):
 
 
 def delete_student(db, student_id):
+
     student = db.query(models.Student).filter(
         models.Student.id == student_id
     ).first()
@@ -93,6 +98,7 @@ def delete_student(db, student_id):
 # ======================
 
 def create_user(db, user):
+
     hashed_password = hash_password(user.password)
 
     db_user = models.User(
@@ -109,6 +115,7 @@ def create_user(db, user):
 
 
 def login_user(db, email, password):
+
     user = db.query(models.User).filter(
         models.User.email == email
     ).first()
@@ -126,7 +133,7 @@ def login_user(db, email, password):
 
 
 # ======================
-# STUDENT LOGIN (JWT)
+# STUDENT LOGIN
 # ======================
 
 def student_login(db, student_id, password):
@@ -148,10 +155,29 @@ def student_login(db, student_id, password):
 
 
 # ======================
+# TEACHER
+# ======================
+
+def get_teacher_by_email(db, email):
+
+    return db.query(models.Teacher).filter(
+        models.Teacher.email == email
+    ).first()
+
+
+def get_teacher_students(db, teacher_id):
+
+    return db.query(models.Student).filter(
+        models.Student.teacher_id == teacher_id
+    ).all()
+
+
+# ======================
 # APPLICATION
 # ======================
 
 def create_application(db: Session, application):
+
     db_application = models.Application(
         student_id=application.student_id,
         company_id=application.company_id,
@@ -166,16 +192,20 @@ def create_application(db: Session, application):
 
 
 def get_applications(db: Session):
+
     return db.query(models.Application).all()
 
 
 def update_application_status(db, application_id, status):
+
     application = db.query(models.Application).filter(
         models.Application.id == application_id
     ).first()
 
     if application:
+
         application.status = status
+
         db.commit()
         db.refresh(application)
 
@@ -193,7 +223,9 @@ def upload_application_file(db, application_id, file_path):
     ).first()
 
     if application:
+
         application.file = file_path
+
         db.commit()
         db.refresh(application)
 
@@ -205,7 +237,16 @@ def upload_application_file(db, application_id, file_path):
 # ======================
 
 def create_supervision(db, supervision):
-    db_supervision = models.Supervision(**supervision.dict())
+
+    db_supervision = models.Supervision(
+        teacher_id=supervision.teacher_id,
+        student_id=supervision.student_id,
+        company_id=supervision.company_id,
+        date=supervision.date,
+        type=supervision.type,
+        note=supervision.note,
+        status=supervision.status
+    )
 
     db.add(db_supervision)
     db.commit()
@@ -215,17 +256,63 @@ def create_supervision(db, supervision):
 
 
 def get_supervisions(db):
+
     return db.query(models.Supervision).all()
 
 
-# ======================
-# TEACHER
-# ======================
+# ข้อมูลนิเทศของอาจารย์
+def get_teacher_supervisions(db, teacher_id):
 
-def get_teacher_students(db, teacher_id):
-    return db.query(models.Student).filter(
-        models.Student.teacher_id == teacher_id
+    result = db.query(
+
+        models.Teacher.first_name.label(
+            "teacher_first_name"
+        ),
+
+        models.Teacher.last_name.label(
+            "teacher_last_name"
+        ),
+
+        models.Company.company_name,
+
+        models.Company.industry,
+
+        models.Student.student_id,
+
+        models.Student.first_name.label(
+            "student_first_name"
+        ),
+
+        models.Student.last_name.label(
+            "student_last_name"
+        ),
+
+        models.Supervision.date,
+        models.Supervision.type,
+        models.Supervision.status
+
+    ).join(
+
+        models.Supervision,
+        models.Supervision.teacher_id == models.Teacher.id
+
+    ).join(
+
+        models.Student,
+        models.Supervision.student_id == models.Student.id
+
+    ).join(
+
+        models.Company,
+        models.Supervision.company_id == models.Company.id
+
+    ).filter(
+
+        models.Teacher.id == teacher_id
+
     ).all()
+
+    return result
 
 
 # ======================
@@ -234,33 +321,52 @@ def get_teacher_students(db, teacher_id):
 
 def admin_dashboard(db: Session):
 
-    student_count = db.query(func.count(models.Student.id)).scalar()
+    student_count = db.query(
+        func.count(models.Student.id)
+    ).scalar()
 
-    company_count = db.query(func.count(models.Company.id)).scalar()
+    company_count = db.query(
+        func.count(models.Company.id)
+    ).scalar()
 
     application_count = db.query(
         func.count(models.Application.id)
     ).scalar()
 
+    supervision_count = db.query(
+        func.count(models.Supervision.id)
+    ).scalar()
+
     return {
         "students": student_count,
         "companies": company_count,
-        "applications": application_count
+        "applications": application_count,
+        "supervisions": supervision_count
     }
 
 
 def teacher_dashboard(db: Session, teacher_id):
 
-    student_count = db.query(models.Student).filter(
+    student_count = db.query(
+        models.Student
+    ).filter(
         models.Student.teacher_id == teacher_id
     ).count()
 
-    supervisions = db.query(models.Supervision).filter(
+    supervision_count = db.query(
+        models.Supervision
+    ).filter(
         models.Supervision.teacher_id == teacher_id
-    ).all()
+    ).count()
+
+    supervisions = get_teacher_supervisions(
+        db,
+        teacher_id
+    )
 
     return {
         "students": student_count,
+        "supervision_count": supervision_count,
         "supervisions": supervisions
     }
 
@@ -270,12 +376,15 @@ def teacher_dashboard(db: Session, teacher_id):
 # ======================
 
 def assign_teacher(db, student_id, teacher_id):
+
     student = db.query(models.Student).filter(
         models.Student.id == student_id
     ).first()
 
     if student:
+
         student.teacher_id = teacher_id
+
         db.commit()
         db.refresh(student)
 
@@ -287,6 +396,7 @@ def assign_teacher(db, student_id, teacher_id):
 # ======================
 
 def create_company(db, company):
+
     db_company = models.Company(
         company_name=company.company_name,
         address=company.address,
@@ -305,15 +415,18 @@ def create_company(db, company):
 
 
 def get_companies(db):
+
     return db.query(models.Company).all()
 
 
 def update_company(db, company_id, company):
+
     db_company = db.query(models.Company).filter(
         models.Company.id == company_id
     ).first()
 
     if db_company:
+
         db_company.company_name = company.company_name
         db_company.address = company.address
         db_company.industry = company.industry
@@ -329,12 +442,15 @@ def update_company(db, company_id, company):
 
 
 def delete_company(db, company_id):
+
     company = db.query(models.Company).filter(
         models.Company.id == company_id
     ).first()
 
     if company:
+
         db.delete(company)
+
         db.commit()
 
     return company
