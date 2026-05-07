@@ -19,6 +19,9 @@ def create_student(db, student):
         last_name=student.last_name,
         faculty=student.faculty,
         major=student.major,
+        email=student.email,
+        phone=student.phone,
+        year=student.year,
         teacher_id=student.teacher_id
     )
 
@@ -38,6 +41,9 @@ def create_student_user(db, student):
         last_name=student.last_name,
         faculty=student.faculty,
         major=student.major,
+        email=student.email,
+        phone=student.phone,
+        year=student.year,
         password=hashed
     )
 
@@ -59,6 +65,10 @@ def update_student(db, student_id, student):
         db_student.last_name = student.last_name
         db_student.faculty = student.faculty
         db_student.major = student.major
+        db_student.email = student.email
+        db_student.phone = student.phone
+        db_student.year = student.year
+        db_student.teacher_id = student.teacher_id
 
         db.commit()
         db.refresh(db_student)
@@ -106,7 +116,7 @@ def login_user(db, email, password):
     if not user:
         return None
 
-    if not user.password:   # 👈 กัน null
+    if not user.password:
         return None
 
     if not verify_password(password, user.password):
@@ -128,7 +138,7 @@ def student_login(db, student_id, password):
     if not student:
         return None
 
-    if not student.password:   # 👈 กัน null (สำคัญมาก)
+    if not student.password:
         return None
 
     if not verify_password(password, student.password):
@@ -277,7 +287,15 @@ def assign_teacher(db, student_id, teacher_id):
 # ======================
 
 def create_company(db, company):
-    db_company = models.Company(**company.dict())
+    db_company = models.Company(
+        company_name=company.company_name,
+        address=company.address,
+        industry=company.industry,
+        allowance=company.allowance,
+        accommodation=company.accommodation,
+        shuttle=company.shuttle,
+        welfare=company.welfare
+    )
 
     db.add(db_company)
     db.commit()
@@ -299,6 +317,10 @@ def update_company(db, company_id, company):
         db_company.company_name = company.company_name
         db_company.address = company.address
         db_company.industry = company.industry
+        db_company.allowance = company.allowance
+        db_company.accommodation = company.accommodation
+        db_company.shuttle = company.shuttle
+        db_company.welfare = company.welfare
 
         db.commit()
         db.refresh(db_company)
