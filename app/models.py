@@ -51,7 +51,11 @@ class Company(Base):
     company_name = Column(String)
     address = Column(String)
     industry = Column(String)
-
+    allowance = Column(String)
+    accommodation = Column(String)
+    shuttle = Column(String)
+    welfare = Column(String)
+    
     applications = relationship("Application", back_populates="company")
 
 
