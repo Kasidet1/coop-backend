@@ -16,10 +16,10 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # 👈 อนุญาตทุก origin
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],   # 👈 ทุก method (GET, POST, PUT, DELETE)
-    allow_headers=["*"],   # 👈 ทุก header
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # ======================
@@ -74,27 +74,44 @@ def delete_student(
 # ======================
 
 @app.post("/register")
-def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
+def register(
+    user: schemas.UserCreate,
+    db: Session = Depends(get_db)
+):
     return crud.create_user(db, user)
 
 
 @app.post("/login")
-def login(user: schemas.Login, db: Session = Depends(get_db)):
+def login(
+    user: schemas.Login,
+    db: Session = Depends(get_db)
+):
 
-    db_user = crud.login_user(db, user.email, user.password)
+    db_user = crud.login_user(
+        db,
+        user.email,
+        user.password
+    )
 
     if not db_user:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials"
+        )
 
     access_token = create_access_token(
-        data={"sub": db_user.email, "role": db_user.role}
+        data={
+            "sub": db_user.email,
+            "role": db_user.role
+        }
     )
 
     return {
         "access_token": access_token,
         "role": db_user.role
     }
-    
+
+
 # ======================
 # APPLICATION
 # ======================
@@ -105,7 +122,10 @@ def apply_company(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
-    return crud.create_application(db, application)
+    return crud.create_application(
+        db,
+        application
+    )
 
 
 @app.get("/applications")
@@ -122,7 +142,11 @@ def approve_application(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
-    return crud.update_application_status(db, application_id, "approved")
+    return crud.update_application_status(
+        db,
+        application_id,
+        "approved"
+    )
 
 
 @app.put("/applications/{application_id}/reject")
@@ -131,7 +155,11 @@ def reject_application(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
-    return crud.update_application_status(db, application_id, "rejected")
+    return crud.update_application_status(
+        db,
+        application_id,
+        "rejected"
+    )
 
 # ======================
 # UPLOAD PDF
@@ -148,12 +176,20 @@ def upload_pdf(
 
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    file_path = os.path.join(
+        UPLOAD_DIR,
+        file.filename
+    )
 
     with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        shutil.copyfileobj(
+            file.file,
+            buffer
+        )
 
-    return {"filename": file.filename}
+    return {
+        "filename": file.filename
+    }
 
 # ======================
 # SUPERVISION
@@ -165,7 +201,10 @@ def create_supervision(
     db: Session = Depends(get_db),
     user=Depends(require_role("teacher"))
 ):
-    return crud.create_supervision(db, supervision)
+    return crud.create_supervision(
+        db,
+        supervision
+    )
 
 
 @app.get("/supervision")
@@ -174,6 +213,7 @@ def read_supervision(
     user=Depends(require_role("teacher"))
 ):
     return crud.get_supervisions(db)
+
 
 # ======================
 # TEACHER
@@ -184,7 +224,22 @@ def teacher_students(
     db: Session = Depends(get_db),
     user=Depends(require_role("teacher"))
 ):
-    return crud.get_teacher_students(db, user["sub"])
+
+    teacher = crud.get_teacher_by_email(
+        db,
+        user["sub"]
+    )
+
+    if not teacher:
+        raise HTTPException(
+            status_code=404,
+            detail="Teacher not found"
+        )
+
+    return crud.get_teacher_students(
+        db,
+        teacher.id
+    )
 
 
 @app.get("/teacher/dashboard")
@@ -192,7 +247,46 @@ def teacher_dashboard(
     db: Session = Depends(get_db),
     user=Depends(require_role("teacher"))
 ):
-    return crud.teacher_dashboard(db, user["sub"])
+
+    teacher = crud.get_teacher_by_email(
+        db,
+        user["sub"]
+    )
+
+    if not teacher:
+        raise HTTPException(
+            status_code=404,
+            detail="Teacher not found"
+        )
+
+    return crud.teacher_dashboard(
+        db,
+        teacher.id
+    )
+
+
+# หน้าแสดงนิเทศของอาจารย์
+@app.get("/teacher/supervisions")
+def teacher_supervisions(
+    db: Session = Depends(get_db),
+    user=Depends(require_role("teacher"))
+):
+
+    teacher = crud.get_teacher_by_email(
+        db,
+        user["sub"]
+    )
+
+    if not teacher:
+        raise HTTPException(
+            status_code=404,
+            detail="Teacher not found"
+        )
+
+    return crud.get_teacher_supervisions(
+        db,
+        teacher.id
+    )
 
 # ======================
 # ADMIN
@@ -215,7 +309,11 @@ def assign_teacher(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
-    return crud.assign_teacher(db, data.student_id, data.teacher_id)
+    return crud.assign_teacher(
+        db,
+        data.student_id,
+        data.teacher_id
+    )
 
 # ======================
 # COMPANIES
@@ -227,7 +325,10 @@ def create_company(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
-    return crud.create_company(db, company)
+    return crud.create_company(
+        db,
+        company
+    )
 
 
 @app.get("/companies")
@@ -245,7 +346,11 @@ def update_company(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
-    return crud.update_company(db, company_id, company)
+    return crud.update_company(
+        db,
+        company_id,
+        company
+    )
 
 
 @app.delete("/companies/{company_id}")
@@ -254,4 +359,7 @@ def delete_company(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
-    return crud.delete_company(db, company_id)
+    return crud.delete_company(
+        db,
+        company_id
+    )
