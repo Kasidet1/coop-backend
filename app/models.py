@@ -106,8 +106,6 @@ class Application(Base):
 
     status = Column(String, default="pending")
 
-    # upload pdf
-    file = Column(String)
 
     student = relationship(
         "Student",
