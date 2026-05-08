@@ -143,7 +143,6 @@ class Application(BaseModel):
     student_id: int
     company_id: int
     status: str
-    file: Optional[str] = None
 
     class Config:
         from_attributes = True
