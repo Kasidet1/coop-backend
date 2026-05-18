@@ -1,17 +1,22 @@
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+
 import shutil
 import os
 
 from . import schemas, crud
 from .database import get_db
-from .auth import create_access_token, get_current_user, require_role
+from .auth import (
+    create_access_token,
+    get_current_user,
+    require_role
+)
 
 app = FastAPI()
 
 # ======================
-# CORS (เปิดทั้งหมด)
+# CORS
 # ======================
 
 app.add_middleware(
@@ -28,54 +33,10 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"message": "Coop backend"}
 
-
-# ======================
-# STUDENTS (Admin Only)
-# ======================
-
-@app.get("/students")
-def read_students(
-    db: Session = Depends(get_db),
-    user=Depends(require_role("admin"))
-):
-    return crud.get_students(db)
-
-
-@app.post("/students")
-def create_student(
-    student: schemas.StudentCreate,
-    db: Session = Depends(get_db),
-    user=Depends(require_role("admin"))
-):
-    return crud.create_student(db, student)
-
-
-@app.put("/students/{student_id}")
-def update_student(
-    student_id: int,
-    student: schemas.StudentCreate,
-    db: Session = Depends(get_db),
-    user=Depends(require_role("admin"))
-):
-    return crud.update_student(
-        db,
-        student_id,
-        student
-    )
-
-
-@app.delete("/students/{student_id}")
-def delete_student(
-    student_id: int,
-    db: Session = Depends(get_db),
-    user=Depends(require_role("admin"))
-):
-    return crud.delete_student(
-        db,
-        student_id
-    )
+    return {
+        "message": "Coop backend"
+    }
 
 
 # ======================
@@ -87,7 +48,11 @@ def register(
     user: schemas.UserCreate,
     db: Session = Depends(get_db)
 ):
-    return crud.create_user(db, user)
+
+    return crud.create_user(
+        db,
+        user
+    )
 
 
 @app.post("/login")
@@ -103,6 +68,7 @@ def login(
     )
 
     if not db_user:
+
         raise HTTPException(
             status_code=401,
             detail="Invalid credentials"
@@ -122,6 +88,60 @@ def login(
 
 
 # ======================
+# STUDENTS
+# ======================
+
+@app.get("/students")
+def read_students(
+    db: Session = Depends(get_db),
+    user=Depends(require_role("admin"))
+):
+
+    return crud.get_students(db)
+
+
+@app.post("/students")
+def create_student(
+    student: schemas.StudentCreate,
+    db: Session = Depends(get_db),
+    user=Depends(require_role("admin"))
+):
+
+    return crud.create_student(
+        db,
+        student
+    )
+
+
+@app.put("/students/{student_id}")
+def update_student(
+    student_id: int,
+    student: schemas.StudentCreate,
+    db: Session = Depends(get_db),
+    user=Depends(require_role("admin"))
+):
+
+    return crud.update_student(
+        db,
+        student_id,
+        student
+    )
+
+
+@app.delete("/students/{student_id}")
+def delete_student(
+    student_id: int,
+    db: Session = Depends(get_db),
+    user=Depends(require_role("admin"))
+):
+
+    return crud.delete_student(
+        db,
+        student_id
+    )
+
+
+# ======================
 # APPLICATION
 # ======================
 
@@ -131,6 +151,7 @@ def apply_company(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
+
     return crud.create_application(
         db,
         application
@@ -142,6 +163,7 @@ def read_applications(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
+
     return crud.get_applications(db)
 
 
@@ -151,6 +173,7 @@ def approve_application(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
+
     return crud.update_application_status(
         db,
         application_id,
@@ -164,6 +187,7 @@ def reject_application(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
+
     return crud.update_application_status(
         db,
         application_id,
@@ -185,7 +209,10 @@ def upload_pdf(
     user=Depends(get_current_user)
 ):
 
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    os.makedirs(
+        UPLOAD_DIR,
+        exist_ok=True
+    )
 
     file_path = os.path.join(
         UPLOAD_DIR,
@@ -193,6 +220,7 @@ def upload_pdf(
     )
 
     with open(file_path, "wb") as buffer:
+
         shutil.copyfileobj(
             file.file,
             buffer
@@ -213,6 +241,7 @@ def create_supervision(
     db: Session = Depends(get_db),
     user=Depends(require_role("teacher"))
 ):
+
     return crud.create_supervision(
         db,
         supervision
@@ -224,53 +253,13 @@ def read_supervision(
     db: Session = Depends(get_db),
     user=Depends(require_role("teacher"))
 ):
+
     return crud.get_supervisions(db)
 
 
 # ======================
 # TEACHER
 # ======================
-
-@app.get("/teacher/me")
-def teacher_me(
-    db: Session = Depends(get_db),
-    user=Depends(require_role("teacher"))
-):
-
-    teacher = crud.get_teacher_profile(
-        db,
-        user["sub"]
-    )
-
-    if not teacher:
-        raise HTTPException(
-            status_code=404,
-            detail="Teacher not found"
-        )
-
-    return teacher
-
-
-@app.put("/teacher/me")
-def update_teacher_me(
-    teacher_data: schemas.TeacherUpdate,
-    db: Session = Depends(get_db),
-    user=Depends(require_role("teacher"))
-):
-
-    teacher = crud.update_teacher_profile(
-        db,
-        user["sub"],
-        teacher_data
-    )
-
-    if not teacher:
-        raise HTTPException(
-            status_code=404,
-            detail="Teacher not found"
-        )
-
-    return teacher
 
 @app.get("/teacher/students")
 def teacher_students(
@@ -284,6 +273,7 @@ def teacher_students(
     )
 
     if not teacher:
+
         raise HTTPException(
             status_code=404,
             detail="Teacher not found"
@@ -307,6 +297,7 @@ def teacher_dashboard(
     )
 
     if not teacher:
+
         raise HTTPException(
             status_code=404,
             detail="Teacher not found"
@@ -330,6 +321,7 @@ def teacher_supervisions(
     )
 
     if not teacher:
+
         raise HTTPException(
             status_code=404,
             detail="Teacher not found"
@@ -342,6 +334,54 @@ def teacher_supervisions(
 
 
 # ======================
+# TEACHER PROFILE
+# ======================
+
+@app.get("/teacher/me")
+def teacher_me(
+    db: Session = Depends(get_db),
+    user=Depends(require_role("teacher"))
+):
+
+    teacher = crud.get_teacher_profile(
+        db,
+        user["sub"]
+    )
+
+    if not teacher:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Teacher not found"
+        )
+
+    return teacher
+
+
+@app.put("/teacher/me")
+def update_teacher_me(
+    teacher_data: schemas.TeacherUpdate,
+    db: Session = Depends(get_db),
+    user=Depends(require_role("teacher"))
+):
+
+    teacher = crud.update_teacher_profile(
+        db,
+        user["sub"],
+        teacher_data
+    )
+
+    if not teacher:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Teacher not found"
+        )
+
+    return teacher
+
+
+# ======================
 # ADMIN
 # ======================
 
@@ -350,6 +390,7 @@ def admin_dashboard(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
+
     return crud.admin_dashboard(db)
 
 
@@ -363,6 +404,7 @@ def assign_teacher(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
+
     return crud.assign_teacher(
         db,
         data.student_id,
@@ -380,6 +422,7 @@ def create_company(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
+
     return crud.create_company(
         db,
         company
@@ -401,6 +444,7 @@ def get_companies(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
+
     return crud.get_companies(
         db,
         search,
@@ -419,6 +463,7 @@ def update_company(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
+
     return crud.update_company(
         db,
         company_id,
@@ -432,6 +477,7 @@ def delete_company(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
+
     return crud.delete_company(
         db,
         company_id
