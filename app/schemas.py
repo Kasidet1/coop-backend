@@ -74,6 +74,18 @@ class Student(BaseModel):
     class Config:
         from_attributes = True
 
+# ======================
+# STUDENT UPDATE
+# ======================
+
+class StudentUpdate(BaseModel):
+    first_name: str
+    last_name: str
+    faculty: str
+    major: str
+    username: str
+    phone: str
+    semester: str
 
 # ======================
 # TEACHER
