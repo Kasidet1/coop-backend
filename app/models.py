@@ -12,11 +12,8 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-
     username = Column(String, unique=True)
-
     password = Column(String)
-
     role = Column(String)
 
 
@@ -30,32 +27,14 @@ class Student(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     student_id = Column(String, unique=True)
-
     first_name = Column(String)
-
     last_name = Column(String)
-
     faculty = Column(String)
-
     major = Column(String)
-
     username = Column(String, unique=True)
-
     phone = Column(String)
-
     semester = Column(String)
-
     password = Column(String)
-
-    teacher_id = Column(
-        Integer,
-        ForeignKey("teachers.id")
-    )
-
-    teacher = relationship(
-        "Teacher",
-        back_populates="students"
-    )
 
     applications = relationship(
         "Application",
@@ -78,19 +57,12 @@ class Company(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     company_name = Column(String)
-
     address = Column(String)
-
     county = Column(String)
-
     industry = Column(String)
-
     allowance = Column(String)
-
     accommodation = Column(String)
-
     shuttle = Column(String)
-
     welfare = Column(String)
 
     applications = relationship(
@@ -149,19 +121,11 @@ class Teacher(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     username = Column(String, unique=True)
-
     rank = Column(String)
-
     first_name = Column(String)
-
     last_name = Column(String)
     email = Column(String)
     role = Column(String)
-
-    students = relationship(
-        "Student",
-        back_populates="teacher"
-    )
 
     supervisions = relationship(
         "Supervision",
@@ -194,11 +158,8 @@ class Supervision(Base):
     )
 
     date = Column(Date)
-
     type = Column(String)
-
     note = Column(String)
-
     status = Column(String)
 
     teacher = relationship(
