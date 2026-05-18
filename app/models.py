@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import relationship
+
 from .database import Base
 
 
@@ -13,6 +14,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     username = Column(String, unique=True)
+
     password = Column(String)
 
     role = Column(String)
@@ -30,12 +32,15 @@ class Student(Base):
     student_id = Column(String, unique=True)
 
     first_name = Column(String)
+
     last_name = Column(String)
 
     faculty = Column(String)
+
     major = Column(String)
 
-    email = Column(String, unique=True)
+    username = Column(String, unique=True)
+
     phone = Column(String)
 
     semester = Column(String)
@@ -150,7 +155,7 @@ class Teacher(Base):
     first_name = Column(String)
 
     last_name = Column(String)
-
+    email = Column(String)
     role = Column(String)
 
     students = relationship(
