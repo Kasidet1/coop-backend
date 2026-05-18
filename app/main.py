@@ -105,7 +105,7 @@ def read_students(
 def create_student(
     student: schemas.StudentCreate,
     db: Session = Depends(get_db),
-    user=Depends(require_role("admin"))
+    user=Depends(require_role("student"))
 ):
 
     return crud.create_student(
