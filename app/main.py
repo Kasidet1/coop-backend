@@ -69,63 +69,30 @@ def login(user: schemas.Login, db: Session = Depends(get_db)):
 
 
 # ======================
-# STUDENTS
+# STUDENT (SECURE SELF PROFILE SYSTEM)
 # ======================
 
-@app.get("/students")
-def read_students(
-    db: Session = Depends(get_db),
-    user=Depends(require_role("admin"))
-):
-    return crud.get_students(db)
-
-
-@app.post("/students")
-def create_student(
+@app.post("/student/me")
+def create_my_student_profile(
     student: schemas.StudentCreate,
     db: Session = Depends(get_db),
     user=Depends(require_role("student"))
 ):
+
+    # เช็คว่ามีโปรไฟล์แล้วหรือยัง
+    existing = crud.get_student_profile(db, user["sub"])
+
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="Student profile already exists"
+        )
+
     return crud.create_student(db, student)
 
 
-@app.put("/students/{student_id}")
-def update_student(
-    student_id: int,
-    student: schemas.StudentCreate,
-    db: Session = Depends(get_db),
-    user=Depends(require_role("admin"))
-):
-
-    updated_student = crud.update_student(db, student_id, student)
-
-    if not updated_student:
-        raise HTTPException(status_code=404, detail="Student not found")
-
-    return updated_student
-
-
-@app.delete("/students/{student_id}")
-def delete_student(
-    student_id: int,
-    db: Session = Depends(get_db),
-    user=Depends(require_role("admin"))
-):
-
-    deleted_student = crud.delete_student(db, student_id)
-
-    if not deleted_student:
-        raise HTTPException(status_code=404, detail="Student not found")
-
-    return {"message": "Student deleted"}
-
-
-# ======================
-# STUDENT PROFILE
-# ======================
-
 @app.get("/student/me")
-def get_student_profile(
+def get_my_student_profile(
     db: Session = Depends(get_db),
     user=Depends(require_role("student"))
 ):
@@ -139,18 +106,47 @@ def get_student_profile(
 
 
 @app.put("/student/me")
-def update_student_profile(
+def update_my_student_profile(
     student_data: schemas.StudentUpdate,
     db: Session = Depends(get_db),
     user=Depends(require_role("student"))
 ):
 
-    student = crud.update_student_profile(db, user["sub"], student_data)
+    student = crud.get_student_profile(db, user["sub"])
 
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
 
-    return student
+    updated = crud.update_student_profile(db, user["sub"], student_data)
+
+    return updated
+
+
+# ======================
+# ADMIN STUDENT MANAGEMENT (OPTIONAL)
+# ======================
+
+@app.get("/students")
+def read_students(
+    db: Session = Depends(get_db),
+    user=Depends(require_role("admin"))
+):
+    return crud.get_students(db)
+
+
+@app.delete("/students/{student_id}")
+def delete_student(
+    student_id: int,
+    db: Session = Depends(get_db),
+    user=Depends(require_role("admin"))
+):
+
+    deleted = crud.delete_student(db, student_id)
+
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    return {"message": "Student deleted"}
 
 
 # ======================
@@ -209,7 +205,6 @@ def reject_application(
 # ======================
 
 UPLOAD_DIR = "uploads"
-
 
 @app.post("/upload-pdf")
 def upload_pdf(
