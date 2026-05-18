@@ -35,8 +35,7 @@ class Student(Base):
     faculty = Column(String)
     major = Column(String)
 
-    username = Column(String, unique=True)
-
+    email = Column(String, unique=True)
     phone = Column(String)
 
     semester = Column(String)
@@ -82,8 +81,11 @@ class Company(Base):
     industry = Column(String)
 
     allowance = Column(String)
+
     accommodation = Column(String)
+
     shuttle = Column(String)
+
     welfare = Column(String)
 
     applications = relationship(
@@ -141,12 +143,13 @@ class Teacher(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
+    username = Column(String, unique=True)
+
     rank = Column(String)
 
     first_name = Column(String)
-    last_name = Column(String)
 
-    email = Column(String, unique=True)
+    last_name = Column(String)
 
     role = Column(String)
 
@@ -159,6 +162,7 @@ class Teacher(Base):
         "Supervision",
         back_populates="teacher"
     )
+
 
 # ======================
 # SUPERVISION
