@@ -141,22 +141,14 @@ class Teacher(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    teacher_id = Column(
-        String,
-        unique=True
-    )
+    rank = Column(String)
 
     first_name = Column(String)
     last_name = Column(String)
 
-    faculty = Column(String)
+    email = Column(String, unique=True)
 
-    username = Column(
-        String,
-        unique=True
-    )
-
-    phone = Column(String)
+    role = Column(String)
 
     students = relationship(
         "Student",
@@ -167,7 +159,6 @@ class Teacher(Base):
         "Supervision",
         back_populates="teacher"
     )
-
 
 # ======================
 # SUPERVISION
