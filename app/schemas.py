@@ -80,22 +80,20 @@ class Student(BaseModel):
 # ======================
 
 class TeacherCreate(BaseModel):
-    teacher_id: str
+    rank: str
     first_name: str
     last_name: str
-    faculty: str
-    username: str
-    phone: str
+    email: str
+    role: str
 
 
 class Teacher(BaseModel):
     id: int
-    teacher_id: str
+    rank: str
     first_name: str
     last_name: str
-    faculty: str
-    username: str
-    phone: str
+    email: str
+    role: str
 
     class Config:
         from_attributes = True
