@@ -84,6 +84,7 @@ class TeacherCreate(BaseModel):
     rank: str
     first_name: str
     last_name: str
+    email: str
     role: str
 
 
@@ -93,6 +94,7 @@ class Teacher(BaseModel):
     rank: str
     first_name: str
     last_name: str
+    email: str
     role: str
 
     class Config:
@@ -104,6 +106,7 @@ class TeacherUpdate(BaseModel):
     rank: str
     first_name: str
     last_name: str
+    email: str
     role: str
 
 
