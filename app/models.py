@@ -31,7 +31,6 @@ class Student(Base):
     last_name = Column(String)
     faculty = Column(String)
     major = Column(String)
-    username = Column(String, unique=True)
     phone = Column(String)
     semester = Column(String)
     password = Column(String)
