@@ -88,6 +88,42 @@ def login(
 
 
 # ======================
+# STUDENT LOGIN
+# ======================
+
+@app.post("/student/login")
+def student_login(
+    user: schemas.StudentLogin,
+    db: Session = Depends(get_db)
+):
+
+    student = crud.student_login(
+        db,
+        user.student_id,
+        user.password
+    )
+
+    if not student:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials"
+        )
+
+    access_token = create_access_token(
+        data={
+            "sub": student.student_id,
+            "role": "student"
+        }
+    )
+
+    return {
+        "access_token": access_token,
+        "role": "student"
+    }
+
+
+# ======================
 # STUDENTS
 # ======================
 
@@ -139,6 +175,54 @@ def delete_student(
         db,
         student_id
     )
+
+
+# ======================
+# STUDENT PROFILE
+# ======================
+
+@app.get("/student/me")
+def get_student_profile(
+    db: Session = Depends(get_db),
+    user=Depends(require_role("student"))
+):
+
+    student = crud.get_student_profile(
+        db,
+        user["sub"]
+    )
+
+    if not student:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found"
+        )
+
+    return student
+
+
+@app.put("/student/me")
+def update_student_profile(
+    student_data: schemas.StudentUpdate,
+    db: Session = Depends(get_db),
+    user=Depends(require_role("student"))
+):
+
+    student = crud.update_student_profile(
+        db,
+        user["sub"],
+        student_data
+    )
+
+    if not student:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found"
+        )
+
+    return student
 
 
 # ======================
@@ -332,6 +416,7 @@ def teacher_supervisions(
         teacher.id
     )
 
+
 # ======================
 # TEACHER PROFILE
 # ======================
@@ -348,6 +433,7 @@ def get_my_profile(
     )
 
     if not teacher:
+
         raise HTTPException(
             status_code=404,
             detail="Teacher not found"
@@ -370,12 +456,14 @@ def update_my_profile(
     )
 
     if not teacher:
+
         raise HTTPException(
             status_code=404,
             detail="Teacher not found"
         )
 
     return teacher
+
 
 # ======================
 # ADMIN
