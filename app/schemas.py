@@ -4,7 +4,7 @@ from typing import Optional, List
 
 
 # ======================
-# User
+# USER
 # ======================
 
 class UserCreate(BaseModel):
@@ -23,7 +23,7 @@ class User(BaseModel):
 
 
 # ======================
-# Login
+# LOGIN
 # ======================
 
 class Login(BaseModel):
@@ -32,7 +32,7 @@ class Login(BaseModel):
 
 
 # ======================
-# Student
+# STUDENT
 # ======================
 
 class StudentCreate(BaseModel):
@@ -41,7 +41,7 @@ class StudentCreate(BaseModel):
     last_name: str
     faculty: str
     major: str
-    username: str
+    email: str
     phone: str
     semester: str
     teacher_id: Optional[int] = None
@@ -53,7 +53,7 @@ class StudentRegister(BaseModel):
     last_name: str
     faculty: str
     major: str
-    username: str
+    email: str
     phone: str
     semester: str
     password: str
@@ -66,7 +66,7 @@ class Student(BaseModel):
     last_name: str
     faculty: str
     major: str
-    username: str
+    email: str
     phone: str
     semester: str
     teacher_id: Optional[int] = None
@@ -76,31 +76,39 @@ class Student(BaseModel):
 
 
 # ======================
-# Teacher
+# TEACHER
 # ======================
 
 class TeacherCreate(BaseModel):
+    username: str
     rank: str
     first_name: str
     last_name: str
-    email: str
     role: str
 
 
 class Teacher(BaseModel):
     id: int
+    username: str
     rank: str
     first_name: str
     last_name: str
-    email: str
     role: str
 
     class Config:
         from_attributes = True
 
 
+class TeacherUpdate(BaseModel):
+    username: str
+    rank: str
+    first_name: str
+    last_name: str
+    role: str
+
+
 # ======================
-# Company
+# COMPANY
 # ======================
 
 class CompanyCreate(BaseModel):
@@ -130,7 +138,7 @@ class Company(BaseModel):
 
 
 # ======================
-# Application
+# APPLICATION
 # ======================
 
 class ApplicationCreate(BaseModel):
@@ -149,13 +157,14 @@ class Application(BaseModel):
 
 
 # ======================
-# Supervision
+# SUPERVISION
 # ======================
 
 class SupervisionCreate(BaseModel):
     teacher_id: int
     student_id: int
     company_id: int
+
     date: date
     type: str
     note: str
@@ -164,9 +173,11 @@ class SupervisionCreate(BaseModel):
 
 class Supervision(BaseModel):
     id: int
+
     teacher_id: int
     student_id: int
     company_id: int
+
     date: date
     type: str
     note: str
@@ -177,7 +188,7 @@ class Supervision(BaseModel):
 
 
 # ======================
-# Teacher Supervision View
+# TEACHER SUPERVISION
 # ======================
 
 class TeacherSupervision(BaseModel):
@@ -186,7 +197,6 @@ class TeacherSupervision(BaseModel):
     teacher_last_name: str
 
     company_name: str
-    county: str
     industry: str
 
     student_id: str
@@ -203,7 +213,7 @@ class TeacherSupervision(BaseModel):
 
 
 # ======================
-# Dashboard
+# DASHBOARD
 # ======================
 
 class AdminDashboard(BaseModel):
@@ -220,20 +230,9 @@ class TeacherDashboard(BaseModel):
 
 
 # ======================
-# Assign Teacher
+# ASSIGN TEACHER
 # ======================
 
 class AssignTeacher(BaseModel):
     student_id: int
     teacher_id: int
-    
-# ======================
-# TEACHER PROFILE
-# ======================
-
-class TeacherUpdate(BaseModel):
-    rank: str
-    first_name: str
-    last_name: str
-    email: str
-    role: str
