@@ -332,13 +332,12 @@ def teacher_supervisions(
         teacher.id
     )
 
-
 # ======================
 # TEACHER PROFILE
 # ======================
 
 @app.get("/teacher/me")
-def teacher_me(
+def get_my_profile(
     db: Session = Depends(get_db),
     user=Depends(require_role("teacher"))
 ):
@@ -349,7 +348,6 @@ def teacher_me(
     )
 
     if not teacher:
-
         raise HTTPException(
             status_code=404,
             detail="Teacher not found"
@@ -359,7 +357,7 @@ def teacher_me(
 
 
 @app.put("/teacher/me")
-def update_teacher_me(
+def update_my_profile(
     teacher_data: schemas.TeacherUpdate,
     db: Session = Depends(get_db),
     user=Depends(require_role("teacher"))
@@ -372,14 +370,12 @@ def update_teacher_me(
     )
 
     if not teacher:
-
         raise HTTPException(
             status_code=404,
             detail="Teacher not found"
         )
 
     return teacher
-
 
 # ======================
 # ADMIN
