@@ -33,7 +33,6 @@ class Student(Base):
     major = Column(String)
     phone = Column(String)
     semester = Column(String)
-    password = Column(String)
 
     applications = relationship(
         "Application",
