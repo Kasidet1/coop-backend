@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
-from typing import Optional, List
+from typing import List
 
 
 # ======================
@@ -44,7 +44,6 @@ class StudentCreate(BaseModel):
     email: str
     phone: str
     semester: str
-    teacher_id: Optional[int] = None
 
 
 class StudentRegister(BaseModel):
@@ -69,14 +68,10 @@ class Student(BaseModel):
     email: str
     phone: str
     semester: str
-    teacher_id: Optional[int] = None
 
     class Config:
         from_attributes = True
 
-# ======================
-# STUDENT UPDATE
-# ======================
 
 class StudentUpdate(BaseModel):
     first_name: str
@@ -86,6 +81,7 @@ class StudentUpdate(BaseModel):
     username: str
     phone: str
     semester: str
+
 
 # ======================
 # TEACHER
@@ -203,11 +199,10 @@ class Supervision(BaseModel):
 
 
 # ======================
-# TEACHER SUPERVISION
+# TEACHER SUPERVISION (DISPLAY ONLY)
 # ======================
 
 class TeacherSupervision(BaseModel):
-
     teacher_first_name: str
     teacher_last_name: str
 
@@ -215,7 +210,6 @@ class TeacherSupervision(BaseModel):
     industry: str
 
     student_id: str
-
     student_first_name: str
     student_last_name: str
 
@@ -242,12 +236,3 @@ class TeacherDashboard(BaseModel):
     students: int
     supervision_count: int
     supervisions: List[TeacherSupervision]
-
-
-# ======================
-# ASSIGN TEACHER
-# ======================
-
-class AssignTeacher(BaseModel):
-    student_id: int
-    teacher_id: int
