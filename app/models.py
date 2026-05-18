@@ -11,8 +11,10 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True)
+
+    username = Column(String, unique=True)
     password = Column(String)
+
     role = Column(String)
 
 
@@ -26,22 +28,30 @@ class Student(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     student_id = Column(String, unique=True)
+
     first_name = Column(String)
     last_name = Column(String)
 
     faculty = Column(String)
     major = Column(String)
 
-    email = Column(String, unique=True)
+    username = Column(String, unique=True)
+
     phone = Column(String)
-    year = Column(String)
+
+    semester = Column(String)
 
     password = Column(String)
 
-    teacher_id = Column(Integer, ForeignKey("teachers.id"))
+    teacher_id = Column(
+        Integer,
+        ForeignKey("teachers.id")
+    )
 
-    # relationship
-    teacher = relationship("Teacher", back_populates="students")
+    teacher = relationship(
+        "Teacher",
+        back_populates="students"
+    )
 
     applications = relationship(
         "Application",
@@ -64,9 +74,11 @@ class Company(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     company_name = Column(String)
+
     address = Column(String)
 
-    # สายงาน
+    county = Column(String)
+
     industry = Column(String)
 
     allowance = Column(String)
@@ -104,8 +116,10 @@ class Application(Base):
         ForeignKey("companies.id")
     )
 
-    status = Column(String, default="pending")
-
+    status = Column(
+        String,
+        default="pending"
+    )
 
     student = relationship(
         "Student",
@@ -127,14 +141,21 @@ class Teacher(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    teacher_id = Column(String, unique=True)
+    teacher_id = Column(
+        String,
+        unique=True
+    )
 
     first_name = Column(String)
     last_name = Column(String)
 
     faculty = Column(String)
 
-    email = Column(String, unique=True)
+    username = Column(
+        String,
+        unique=True
+    )
+
     phone = Column(String)
 
     students = relationship(
@@ -167,7 +188,6 @@ class Supervision(Base):
         ForeignKey("students.id")
     )
 
-    # เพิ่ม company_id
     company_id = Column(
         Integer,
         ForeignKey("companies.id")
@@ -175,12 +195,10 @@ class Supervision(Base):
 
     date = Column(Date)
 
-    # onsite / online
     type = Column(String)
 
     note = Column(String)
 
-    # pending / completed
     status = Column(String)
 
     teacher = relationship(
