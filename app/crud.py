@@ -22,7 +22,7 @@ def create_student(db, student):
         last_name=student.last_name,
         faculty=student.faculty,
         major=student.major,
-        email=student.email,
+        username=student.username,
         phone=student.phone,
         semester=student.semester,
         teacher_id=student.teacher_id
@@ -47,7 +47,7 @@ def create_student_user(db, student):
         last_name=student.last_name,
         faculty=student.faculty,
         major=student.major,
-        email=student.email,
+        username=student.username,
         phone=student.phone,
         semester=student.semester,
         password=hashed
@@ -75,7 +75,7 @@ def update_student(db, student_id, student):
         db_student.last_name = student.last_name
         db_student.faculty = student.faculty
         db_student.major = student.major
-        db_student.email = student.email
+        db_student.username = student.username
         db_student.phone = student.phone
         db_student.semester = student.semester
         db_student.teacher_id = student.teacher_id
