@@ -30,6 +30,7 @@ app.add_middleware(
 def root():
     return {"message": "Coop backend"}
 
+
 # ======================
 # STUDENTS (Admin Only)
 # ======================
@@ -58,7 +59,11 @@ def update_student(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
-    return crud.update_student(db, student_id, student)
+    return crud.update_student(
+        db,
+        student_id,
+        student
+    )
 
 
 @app.delete("/students/{student_id}")
@@ -67,7 +72,11 @@ def delete_student(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
-    return crud.delete_student(db, student_id)
+    return crud.delete_student(
+        db,
+        student_id
+    )
+
 
 # ======================
 # AUTH
@@ -89,7 +98,7 @@ def login(
 
     db_user = crud.login_user(
         db,
-        user.email,
+        user.username,
         user.password
     )
 
@@ -101,7 +110,7 @@ def login(
 
     access_token = create_access_token(
         data={
-            "sub": db_user.email,
+            "sub": db_user.username,
             "role": db_user.role
         }
     )
@@ -161,11 +170,13 @@ def reject_application(
         "rejected"
     )
 
+
 # ======================
 # UPLOAD PDF
 # ======================
 
 UPLOAD_DIR = "uploads"
+
 
 @app.post("/upload-pdf")
 def upload_pdf(
@@ -190,6 +201,7 @@ def upload_pdf(
     return {
         "filename": file.filename
     }
+
 
 # ======================
 # SUPERVISION
@@ -225,7 +237,7 @@ def teacher_students(
     user=Depends(require_role("teacher"))
 ):
 
-    teacher = crud.get_teacher_by_email(
+    teacher = crud.get_teacher_by_username(
         db,
         user["sub"]
     )
@@ -248,7 +260,7 @@ def teacher_dashboard(
     user=Depends(require_role("teacher"))
 ):
 
-    teacher = crud.get_teacher_by_email(
+    teacher = crud.get_teacher_by_username(
         db,
         user["sub"]
     )
@@ -272,7 +284,7 @@ def teacher_supervisions(
     user=Depends(require_role("teacher"))
 ):
 
-    teacher = crud.get_teacher_by_email(
+    teacher = crud.get_teacher_by_username(
         db,
         user["sub"]
     )
@@ -288,6 +300,7 @@ def teacher_supervisions(
         teacher.id
     )
 
+
 # ======================
 # ADMIN
 # ======================
@@ -298,6 +311,7 @@ def admin_dashboard(
     user=Depends(require_role("admin"))
 ):
     return crud.admin_dashboard(db)
+
 
 # ======================
 # ASSIGN TEACHER
@@ -315,6 +329,7 @@ def assign_teacher(
         data.teacher_id
     )
 
+
 # ======================
 # COMPANIES
 # ======================
@@ -331,12 +346,30 @@ def create_company(
     )
 
 
+# ======================
+# SEARCH + FILTER COMPANY
+# ======================
+
 @app.get("/companies")
 def get_companies(
+    search: str = None,
+    county: str = None,
+    industry: str = None,
+    allowance: str = None,
+    accommodation: str = None,
+    shuttle: str = None,
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
-    return crud.get_companies(db)
+    return crud.get_companies(
+        db,
+        search,
+        county,
+        industry,
+        allowance,
+        accommodation,
+        shuttle
+    )
 
 
 @app.put("/companies/{company_id}")
