@@ -226,3 +226,14 @@ class TeacherDashboard(BaseModel):
 class AssignTeacher(BaseModel):
     student_id: int
     teacher_id: int
+    
+# ======================
+# TEACHER PROFILE
+# ======================
+
+class TeacherUpdate(BaseModel):
+    rank: str
+    first_name: str
+    last_name: str
+    email: str
+    role: str
