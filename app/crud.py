@@ -556,3 +556,41 @@ def delete_company(db, company_id):
         db.commit()
 
     return company
+
+# ======================
+# TEACHER PROFILE
+# ======================
+
+def get_teacher_profile(
+    db,
+    username
+):
+
+    return db.query(models.Teacher).filter(
+        models.Teacher.email == username
+    ).first()
+
+
+def update_teacher_profile(
+    db,
+    username,
+    teacher_data
+):
+
+    teacher = db.query(models.Teacher).filter(
+        models.Teacher.email == username
+    ).first()
+
+    if not teacher:
+        return None
+
+    teacher.rank = teacher_data.rank
+    teacher.first_name = teacher_data.first_name
+    teacher.last_name = teacher_data.last_name
+    teacher.email = teacher_data.email
+    teacher.role = teacher_data.role
+
+    db.commit()
+    db.refresh(teacher)
+
+    return teacher
