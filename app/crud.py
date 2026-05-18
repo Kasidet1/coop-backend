@@ -35,7 +35,7 @@ def create_student(db, student):
         faculty=student.faculty,
         major=student.major,
 
-        # username = student_id
+        # ใช้ student_id เป็น username
         username=student.student_id,
 
         phone=student.phone,
@@ -72,12 +72,18 @@ def update_student(
     db_student.faculty = student.faculty
     db_student.major = student.major
 
-    # username = student_id
+    # sync username กับ student_id
     db_student.username = student.student_id
 
     db_student.phone = student.phone
     db_student.semester = student.semester
     db_student.teacher_id = student.teacher_id
+
+    # update password ถ้ามีส่งมา
+    if hasattr(student, "password") and student.password:
+        db_student.password = hash_password(
+            student.password
+        )
 
     db.commit()
 
@@ -182,6 +188,7 @@ def login_user(
 
     # ======================
     # LOGIN USER TABLE
+    # admin / teacher
     # ======================
 
     user = db.query(models.User).filter(
@@ -195,7 +202,10 @@ def login_user(
             user.password
         ):
 
-            return user
+            return {
+                "username": user.username,
+                "role": user.role
+            }
 
     # ======================
     # LOGIN STUDENT TABLE
@@ -213,9 +223,10 @@ def login_user(
             student.password
         ):
 
-            student.role = "student"
-
-            return student
+            return {
+                "username": student.student_id,
+                "role": "student"
+            }
 
     return None
 
