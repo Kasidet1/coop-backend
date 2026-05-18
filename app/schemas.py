@@ -8,14 +8,14 @@ from typing import Optional, List
 # ======================
 
 class UserCreate(BaseModel):
-    email: str
+    username: str
     password: str
     role: str
 
 
 class User(BaseModel):
     id: int
-    email: str
+    username: str
     role: str
 
     class Config:
@@ -27,7 +27,7 @@ class User(BaseModel):
 # ======================
 
 class Login(BaseModel):
-    email: str
+    username: str
     password: str
 
 
@@ -41,9 +41,9 @@ class StudentCreate(BaseModel):
     last_name: str
     faculty: str
     major: str
-    email: str
+    username: str
     phone: str
-    year: str
+    semester: str
     teacher_id: Optional[int] = None
 
 
@@ -53,9 +53,9 @@ class StudentRegister(BaseModel):
     last_name: str
     faculty: str
     major: str
-    email: str
+    username: str
     phone: str
-    year: str
+    semester: str
     password: str
 
 
@@ -66,9 +66,9 @@ class Student(BaseModel):
     last_name: str
     faculty: str
     major: str
-    email: str
+    username: str
     phone: str
-    year: str
+    semester: str
     teacher_id: Optional[int] = None
 
     class Config:
@@ -84,7 +84,7 @@ class TeacherCreate(BaseModel):
     first_name: str
     last_name: str
     faculty: str
-    email: str
+    username: str
     phone: str
 
 
@@ -94,7 +94,7 @@ class Teacher(BaseModel):
     first_name: str
     last_name: str
     faculty: str
-    email: str
+    username: str
     phone: str
 
     class Config:
@@ -108,6 +108,7 @@ class Teacher(BaseModel):
 class CompanyCreate(BaseModel):
     company_name: str
     address: str
+    county: str
     industry: str
     allowance: str
     accommodation: str
@@ -119,6 +120,7 @@ class Company(BaseModel):
     id: int
     company_name: str
     address: str
+    county: str
     industry: str
     allowance: str
     accommodation: str
@@ -155,10 +157,7 @@ class Application(BaseModel):
 class SupervisionCreate(BaseModel):
     teacher_id: int
     student_id: int
-
-    # เพิ่ม company_id
     company_id: int
-
     date: date
     type: str
     note: str
@@ -167,11 +166,9 @@ class SupervisionCreate(BaseModel):
 
 class Supervision(BaseModel):
     id: int
-
     teacher_id: int
     student_id: int
     company_id: int
-
     date: date
     type: str
     note: str
@@ -191,9 +188,11 @@ class TeacherSupervision(BaseModel):
     teacher_last_name: str
 
     company_name: str
+    county: str
     industry: str
 
     student_id: str
+
     student_first_name: str
     student_last_name: str
 
