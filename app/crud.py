@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
 
 from . import models
-from .auth import hash_password, verify_password
 
 
 # ======================
@@ -24,9 +23,10 @@ def get_student_by_student_id(
     ).first()
 
 
-def create_student(db, student):
-
-    hashed_password = hash_password(student.password)
+def create_student(
+    db,
+    student
+):
 
     new_student = models.Student(
         student_id=student.student_id,
@@ -40,7 +40,10 @@ def create_student(db, student):
 
         phone=student.phone,
         semester=student.semester,
-        password=hashed_password,
+
+        # ไม่ hash password
+        password=student.password,
+
         teacher_id=student.teacher_id
     )
 
@@ -77,6 +80,10 @@ def update_student(
 
     db_student.phone = student.phone
     db_student.semester = student.semester
+
+    # ไม่ hash password
+    db_student.password = student.password
+
     db_student.teacher_id = student.teacher_id
 
     db.commit()
@@ -111,22 +118,22 @@ def delete_student(
 
 def get_student_profile(
     db,
-    username
+    student_id
 ):
 
     return db.query(models.Student).filter(
-        models.Student.username == username
+        models.Student.student_id == student_id
     ).first()
 
 
 def update_student_profile(
     db,
-    username,
+    student_id,
     student_data
 ):
 
     student = db.query(models.Student).filter(
-        models.Student.username == username
+        models.Student.student_id == student_id
     ).first()
 
     if not student:
@@ -155,13 +162,12 @@ def create_user(
     user
 ):
 
-    hashed_password = hash_password(
-        user.password
-    )
-
     db_user = models.User(
         username=user.username,
-        password=hashed_password,
+
+        # ไม่ hash password
+        password=user.password,
+
         role=user.role
     )
 
@@ -190,10 +196,7 @@ def login_user(
 
     if user:
 
-        if verify_password(
-            password,
-            user.password
-        ):
+        if password == user.password:
 
             return user
 
@@ -208,10 +211,7 @@ def login_user(
 
     if student:
 
-        if verify_password(
-            password,
-            student.password
-        ):
+        if password == student.password:
 
             student.role = "student"
 
@@ -582,10 +582,6 @@ def create_company(
 
     return db_company
 
-
-# ======================
-# SEARCH + FILTER COMPANY
-# ======================
 
 def get_companies(
     db,
