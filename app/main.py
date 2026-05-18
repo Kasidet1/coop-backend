@@ -27,16 +27,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # ======================
 # ROOT
 # ======================
 
 @app.get("/")
 def root():
-
-    return {
-        "message": "Coop backend"
-    }
+    return {"message": "Coop backend"}
 
 
 # ======================
@@ -44,35 +42,17 @@ def root():
 # ======================
 
 @app.post("/register")
-def register(
-    user: schemas.UserCreate,
-    db: Session = Depends(get_db)
-):
-
-    return crud.create_user(
-        db,
-        user
-    )
+def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    return crud.create_user(db, user)
 
 
 @app.post("/login")
-def login(
-    user: schemas.Login,
-    db: Session = Depends(get_db)
-):
+def login(user: schemas.Login, db: Session = Depends(get_db)):
 
-    db_user = crud.login_user(
-        db,
-        user.username,
-        user.password
-    )
+    db_user = crud.login_user(db, user.username, user.password)
 
     if not db_user:
-
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid credentials"
-        )
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
     access_token = create_access_token(
         data={
@@ -97,7 +77,6 @@ def read_students(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
-
     return crud.get_students(db)
 
 
@@ -107,11 +86,7 @@ def create_student(
     db: Session = Depends(get_db),
     user=Depends(require_role("student"))
 ):
-
-    return crud.create_student(
-        db,
-        student
-    )
+    return crud.create_student(db, student)
 
 
 @app.put("/students/{student_id}")
@@ -122,18 +97,10 @@ def update_student(
     user=Depends(require_role("admin"))
 ):
 
-    updated_student = crud.update_student(
-        db,
-        student_id,
-        student
-    )
+    updated_student = crud.update_student(db, student_id, student)
 
     if not updated_student:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Student not found"
-        )
+        raise HTTPException(status_code=404, detail="Student not found")
 
     return updated_student
 
@@ -145,21 +112,12 @@ def delete_student(
     user=Depends(require_role("admin"))
 ):
 
-    deleted_student = crud.delete_student(
-        db,
-        student_id
-    )
+    deleted_student = crud.delete_student(db, student_id)
 
     if not deleted_student:
+        raise HTTPException(status_code=404, detail="Student not found")
 
-        raise HTTPException(
-            status_code=404,
-            detail="Student not found"
-        )
-
-    return {
-        "message": "Student deleted"
-    }
+    return {"message": "Student deleted"}
 
 
 # ======================
@@ -172,17 +130,10 @@ def get_student_profile(
     user=Depends(require_role("student"))
 ):
 
-    student = crud.get_student_profile(
-        db,
-        user["sub"]
-    )
+    student = crud.get_student_profile(db, user["sub"])
 
     if not student:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Student not found"
-        )
+        raise HTTPException(status_code=404, detail="Student not found")
 
     return student
 
@@ -194,18 +145,10 @@ def update_student_profile(
     user=Depends(require_role("student"))
 ):
 
-    student = crud.update_student_profile(
-        db,
-        user["sub"],
-        student_data
-    )
+    student = crud.update_student_profile(db, user["sub"], student_data)
 
     if not student:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Student not found"
-        )
+        raise HTTPException(status_code=404, detail="Student not found")
 
     return student
 
@@ -220,11 +163,7 @@ def apply_company(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
-
-    return crud.create_application(
-        db,
-        application
-    )
+    return crud.create_application(db, application)
 
 
 @app.get("/applications")
@@ -232,7 +171,6 @@ def read_applications(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
-
     return crud.get_applications(db)
 
 
@@ -243,18 +181,10 @@ def approve_application(
     user=Depends(require_role("admin"))
 ):
 
-    application = crud.update_application_status(
-        db,
-        application_id,
-        "approved"
-    )
+    application = crud.update_application_status(db, application_id, "approved")
 
     if not application:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Application not found"
-        )
+        raise HTTPException(status_code=404, detail="Application not found")
 
     return application
 
@@ -266,18 +196,10 @@ def reject_application(
     user=Depends(require_role("admin"))
 ):
 
-    application = crud.update_application_status(
-        db,
-        application_id,
-        "rejected"
-    )
+    application = crud.update_application_status(db, application_id, "rejected")
 
     if not application:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Application not found"
-        )
+        raise HTTPException(status_code=404, detail="Application not found")
 
     return application
 
@@ -296,22 +218,12 @@ def upload_pdf(
     user=Depends(get_current_user)
 ):
 
-    os.makedirs(
-        UPLOAD_DIR,
-        exist_ok=True
-    )
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-    file_path = os.path.join(
-        UPLOAD_DIR,
-        file.filename
-    )
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
 
     with open(file_path, "wb") as buffer:
-
-        shutil.copyfileobj(
-            file.file,
-            buffer
-        )
+        shutil.copyfileobj(file.file, buffer)
 
     return {
         "filename": file.filename,
@@ -329,11 +241,7 @@ def create_supervision(
     db: Session = Depends(get_db),
     user=Depends(require_role("teacher"))
 ):
-
-    return crud.create_supervision(
-        db,
-        supervision
-    )
+    return crud.create_supervision(db, supervision)
 
 
 @app.get("/supervision")
@@ -341,7 +249,6 @@ def read_supervision(
     db: Session = Depends(get_db),
     user=Depends(require_role("teacher"))
 ):
-
     return crud.get_supervisions(db)
 
 
@@ -355,22 +262,12 @@ def teacher_students(
     user=Depends(require_role("teacher"))
 ):
 
-    teacher = crud.get_teacher_by_username(
-        db,
-        user["sub"]
-    )
+    teacher = crud.get_teacher_by_username(db, user["sub"])
 
     if not teacher:
+        raise HTTPException(status_code=404, detail="Teacher not found")
 
-        raise HTTPException(
-            status_code=404,
-            detail="Teacher not found"
-        )
-
-    return crud.get_teacher_students(
-        db,
-        teacher.id
-    )
+    return crud.get_teacher_students(db, teacher.id)
 
 
 @app.get("/teacher/dashboard")
@@ -379,22 +276,12 @@ def teacher_dashboard(
     user=Depends(require_role("teacher"))
 ):
 
-    teacher = crud.get_teacher_by_username(
-        db,
-        user["sub"]
-    )
+    teacher = crud.get_teacher_by_username(db, user["sub"])
 
     if not teacher:
+        raise HTTPException(status_code=404, detail="Teacher not found")
 
-        raise HTTPException(
-            status_code=404,
-            detail="Teacher not found"
-        )
-
-    return crud.teacher_dashboard(
-        db,
-        teacher.id
-    )
+    return crud.teacher_dashboard(db, teacher.id)
 
 
 @app.get("/teacher/supervisions")
@@ -403,22 +290,12 @@ def teacher_supervisions(
     user=Depends(require_role("teacher"))
 ):
 
-    teacher = crud.get_teacher_by_username(
-        db,
-        user["sub"]
-    )
+    teacher = crud.get_teacher_by_username(db, user["sub"])
 
     if not teacher:
+        raise HTTPException(status_code=404, detail="Teacher not found")
 
-        raise HTTPException(
-            status_code=404,
-            detail="Teacher not found"
-        )
-
-    return crud.get_teacher_supervisions(
-        db,
-        teacher.id
-    )
+    return crud.get_teacher_supervisions(db, teacher.id)
 
 
 # ======================
@@ -431,17 +308,10 @@ def get_my_profile(
     user=Depends(require_role("teacher"))
 ):
 
-    teacher = crud.get_teacher_profile(
-        db,
-        user["sub"]
-    )
+    teacher = crud.get_teacher_profile(db, user["sub"])
 
     if not teacher:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Teacher not found"
-        )
+        raise HTTPException(status_code=404, detail="Teacher not found")
 
     return teacher
 
@@ -453,24 +323,16 @@ def update_my_profile(
     user=Depends(require_role("teacher"))
 ):
 
-    teacher = crud.update_teacher_profile(
-        db,
-        user["sub"],
-        teacher_data
-    )
+    teacher = crud.update_teacher_profile(db, user["sub"], teacher_data)
 
     if not teacher:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Teacher not found"
-        )
+        raise HTTPException(status_code=404, detail="Teacher not found")
 
     return teacher
 
 
 # ======================
-# ADMIN
+# ADMIN DASHBOARD
 # ======================
 
 @app.get("/admin/dashboard")
@@ -478,35 +340,7 @@ def admin_dashboard(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
-
     return crud.admin_dashboard(db)
-
-
-# ======================
-# ASSIGN TEACHER
-# ======================
-
-@app.put("/assign-teacher")
-def assign_teacher(
-    data: schemas.AssignTeacher,
-    db: Session = Depends(get_db),
-    user=Depends(require_role("admin"))
-):
-
-    student = crud.assign_teacher(
-        db,
-        data.student_id,
-        data.teacher_id
-    )
-
-    if not student:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Student not found"
-        )
-
-    return student
 
 
 # ======================
@@ -519,16 +353,8 @@ def create_company(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
+    return crud.create_company(db, company)
 
-    return crud.create_company(
-        db,
-        company
-    )
-
-
-# ======================
-# SEARCH + FILTER COMPANY
-# ======================
 
 @app.get("/companies")
 def get_companies(
@@ -541,7 +367,6 @@ def get_companies(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
-
     return crud.get_companies(
         db,
         search,
@@ -561,18 +386,10 @@ def update_company(
     user=Depends(require_role("admin"))
 ):
 
-    updated_company = crud.update_company(
-        db,
-        company_id,
-        company
-    )
+    updated_company = crud.update_company(db, company_id, company)
 
     if not updated_company:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Company not found"
-        )
+        raise HTTPException(status_code=404, detail="Company not found")
 
     return updated_company
 
@@ -584,18 +401,9 @@ def delete_company(
     user=Depends(require_role("admin"))
 ):
 
-    deleted_company = crud.delete_company(
-        db,
-        company_id
-    )
+    deleted_company = crud.delete_company(db, company_id)
 
     if not deleted_company:
+        raise HTTPException(status_code=404, detail="Company not found")
 
-        raise HTTPException(
-            status_code=404,
-            detail="Company not found"
-        )
-
-    return {
-        "message": "Company deleted"
-    }
+    return {"message": "Company deleted"}
