@@ -14,6 +14,16 @@ def get_students(db: Session):
     return db.query(models.Student).all()
 
 
+def get_student_by_student_id(
+    db,
+    student_id
+):
+
+    return db.query(models.Student).filter(
+        models.Student.student_id == student_id
+    ).first()
+
+
 def create_student(db, student):
 
     hashed_password = hash_password(student.password)
@@ -24,7 +34,10 @@ def create_student(db, student):
         last_name=student.last_name,
         faculty=student.faculty,
         major=student.major,
-        username=student.username,
+
+        # username = student_id
+        username=student.student_id,
+
         phone=student.phone,
         semester=student.semester,
         password=hashed_password,
@@ -40,7 +53,11 @@ def create_student(db, student):
     return new_student
 
 
-def update_student(db, student_id, student):
+def update_student(
+    db,
+    student_id,
+    student
+):
 
     db_student = db.query(models.Student).filter(
         models.Student.id == student_id
@@ -54,7 +71,10 @@ def update_student(db, student_id, student):
     db_student.last_name = student.last_name
     db_student.faculty = student.faculty
     db_student.major = student.major
-    db_student.username = student.username
+
+    # username = student_id
+    db_student.username = student.student_id
+
     db_student.phone = student.phone
     db_student.semester = student.semester
     db_student.teacher_id = student.teacher_id
@@ -66,7 +86,10 @@ def update_student(db, student_id, student):
     return db_student
 
 
-def delete_student(db, student_id):
+def delete_student(
+    db,
+    student_id
+):
 
     student = db.query(models.Student).filter(
         models.Student.id == student_id
@@ -88,22 +111,22 @@ def delete_student(db, student_id):
 
 def get_student_profile(
     db,
-    student_id
+    username
 ):
 
     return db.query(models.Student).filter(
-        models.Student.student_id == student_id
+        models.Student.username == username
     ).first()
 
 
 def update_student_profile(
     db,
-    student_id,
+    username,
     student_data
 ):
 
     student = db.query(models.Student).filter(
-        models.Student.student_id == student_id
+        models.Student.username == username
     ).first()
 
     if not student:
@@ -111,7 +134,6 @@ def update_student_profile(
 
     student.first_name = student_data.first_name
     student.last_name = student_data.last_name
-    student.username = student_data.username
     student.phone = student_data.phone
     student.faculty = student_data.faculty
     student.major = student_data.major
@@ -128,9 +150,14 @@ def update_student_profile(
 # USER
 # ======================
 
-def create_user(db, user):
+def create_user(
+    db,
+    user
+):
 
-    hashed_password = hash_password(user.password)
+    hashed_password = hash_password(
+        user.password
+    )
 
     db_user = models.User(
         username=user.username,
@@ -147,54 +174,50 @@ def create_user(db, user):
     return db_user
 
 
-def login_user(db, username, password):
+def login_user(
+    db,
+    username,
+    password
+):
+
+    # ======================
+    # LOGIN USER TABLE
+    # ======================
 
     user = db.query(models.User).filter(
         models.User.username == username
     ).first()
 
-    if not user:
-        return None
+    if user:
 
-    if not user.password:
-        return None
+        if verify_password(
+            password,
+            user.password
+        ):
 
-    if not verify_password(
-        password,
-        user.password
-    ):
-        return None
+            return user
 
-    return user
-
-
-# ======================
-# STUDENT LOGIN
-# ======================
-
-def student_login(
-    db,
-    student_id,
-    password
-):
+    # ======================
+    # LOGIN STUDENT TABLE
+    # username = student_id
+    # ======================
 
     student = db.query(models.Student).filter(
-        models.Student.student_id == student_id
+        models.Student.student_id == username
     ).first()
 
-    if not student:
-        return None
+    if student:
 
-    if not student.password:
-        return None
+        if verify_password(
+            password,
+            student.password
+        ):
 
-    if not verify_password(
-        password,
-        student.password
-    ):
-        return None
+            student.role = "student"
 
-    return student
+            return student
+
+    return None
 
 
 # ======================
@@ -285,7 +308,9 @@ def create_application(
     return db_application
 
 
-def get_applications(db: Session):
+def get_applications(
+    db: Session
+):
 
     return db.query(
         models.Application
@@ -372,7 +397,9 @@ def create_supervision(
     return db_supervision
 
 
-def get_supervisions(db):
+def get_supervisions(
+    db
+):
 
     return db.query(
         models.Supervision
@@ -442,7 +469,9 @@ def get_teacher_supervisions(
 # DASHBOARD
 # ======================
 
-def admin_dashboard(db: Session):
+def admin_dashboard(
+    db: Session
+):
 
     student_count = db.query(
         func.count(models.Student.id)
