@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, or_
+
 from . import models
 from .auth import hash_password, verify_password
 
@@ -9,6 +10,7 @@ from .auth import hash_password, verify_password
 # ======================
 
 def get_students(db: Session):
+
     return db.query(models.Student).all()
 
 
@@ -20,14 +22,16 @@ def create_student(db, student):
         last_name=student.last_name,
         faculty=student.faculty,
         major=student.major,
-        username=student.username,
+        email=student.email,
         phone=student.phone,
         semester=student.semester,
         teacher_id=student.teacher_id
     )
 
     db.add(new_student)
+
     db.commit()
+
     db.refresh(new_student)
 
     return new_student
@@ -43,14 +47,16 @@ def create_student_user(db, student):
         last_name=student.last_name,
         faculty=student.faculty,
         major=student.major,
-        username=student.username,
+        email=student.email,
         phone=student.phone,
         semester=student.semester,
         password=hashed
     )
 
     db.add(db_student)
+
     db.commit()
+
     db.refresh(db_student)
 
     return db_student
@@ -69,12 +75,13 @@ def update_student(db, student_id, student):
         db_student.last_name = student.last_name
         db_student.faculty = student.faculty
         db_student.major = student.major
-        db_student.username = student.username
+        db_student.email = student.email
         db_student.phone = student.phone
         db_student.semester = student.semester
         db_student.teacher_id = student.teacher_id
 
         db.commit()
+
         db.refresh(db_student)
 
     return db_student
@@ -87,7 +94,9 @@ def delete_student(db, student_id):
     ).first()
 
     if student:
+
         db.delete(student)
+
         db.commit()
 
     return student
@@ -108,7 +117,9 @@ def create_user(db, user):
     )
 
     db.add(db_user)
+
     db.commit()
+
     db.refresh(db_user)
 
     return db_user
@@ -126,7 +137,10 @@ def login_user(db, username, password):
     if not user.password:
         return None
 
-    if not verify_password(password, user.password):
+    if not verify_password(
+        password,
+        user.password
+    ):
         return None
 
     return user
@@ -136,7 +150,11 @@ def login_user(db, username, password):
 # STUDENT LOGIN
 # ======================
 
-def student_login(db, student_id, password):
+def student_login(
+    db,
+    student_id,
+    password
+):
 
     student = db.query(models.Student).filter(
         models.Student.student_id == student_id
@@ -148,7 +166,10 @@ def student_login(db, student_id, password):
     if not student.password:
         return None
 
-    if not verify_password(password, student.password):
+    if not verify_password(
+        password,
+        student.password
+    ):
         return None
 
     return student
@@ -158,74 +179,62 @@ def student_login(db, student_id, password):
 # TEACHER
 # ======================
 
-def get_teacher_by_email(db, email):
+def get_teacher_by_username(
+    db,
+    username
+):
 
     return db.query(models.Teacher).filter(
-        models.Teacher.email == email
+        models.Teacher.username == username
     ).first()
 
 
-def get_teacher_by_username(db, username):
-
-    return db.query(models.Teacher).filter(
-        models.Teacher.email == username
-    ).first()
-
-
-def get_teacher_students(db, teacher_id):
+def get_teacher_students(
+    db,
+    teacher_id
+):
 
     return db.query(models.Student).filter(
         models.Student.teacher_id == teacher_id
     ).all()
 
 
-def create_teacher(db, teacher):
+# ======================
+# TEACHER PROFILE
+# ======================
 
-    db_teacher = models.Teacher(
-        rank=teacher.rank,
-        first_name=teacher.first_name,
-        last_name=teacher.last_name,
-        email=teacher.email,
-        role=teacher.role
-    )
+def get_teacher_profile(
+    db,
+    username
+):
 
-    db.add(db_teacher)
-    db.commit()
-    db.refresh(db_teacher)
-
-    return db_teacher
-
-
-def update_teacher(db, teacher_id, teacher):
-
-    db_teacher = db.query(models.Teacher).filter(
-        models.Teacher.id == teacher_id
+    return db.query(models.Teacher).filter(
+        models.Teacher.username == username
     ).first()
 
-    if db_teacher:
 
-        db_teacher.rank = teacher.rank
-        db_teacher.first_name = teacher.first_name
-        db_teacher.last_name = teacher.last_name
-        db_teacher.email = teacher.email
-        db_teacher.role = teacher.role
-
-        db.commit()
-        db.refresh(db_teacher)
-
-    return db_teacher
-
-
-def delete_teacher(db, teacher_id):
+def update_teacher_profile(
+    db,
+    username,
+    teacher_data
+):
 
     teacher = db.query(models.Teacher).filter(
-        models.Teacher.id == teacher_id
+        models.Teacher.username == username
     ).first()
 
-    if teacher:
+    if not teacher:
+        return None
 
-        db.delete(teacher)
-        db.commit()
+    teacher.username = teacher_data.username
+    teacher.rank = teacher_data.rank
+    teacher.first_name = teacher_data.first_name
+    teacher.last_name = teacher_data.last_name
+    teacher.role = teacher_data.role
+
+    db.commit()
+
+    db.refresh(teacher)
 
     return teacher
 
@@ -234,7 +243,10 @@ def delete_teacher(db, teacher_id):
 # APPLICATION
 # ======================
 
-def create_application(db: Session, application):
+def create_application(
+    db: Session,
+    application
+):
 
     db_application = models.Application(
         student_id=application.student_id,
@@ -243,7 +255,9 @@ def create_application(db: Session, application):
     )
 
     db.add(db_application)
+
     db.commit()
+
     db.refresh(db_application)
 
     return db_application
@@ -251,12 +265,20 @@ def create_application(db: Session, application):
 
 def get_applications(db: Session):
 
-    return db.query(models.Application).all()
+    return db.query(
+        models.Application
+    ).all()
 
 
-def update_application_status(db, application_id, status):
+def update_application_status(
+    db,
+    application_id,
+    status
+):
 
-    application = db.query(models.Application).filter(
+    application = db.query(
+        models.Application
+    ).filter(
         models.Application.id == application_id
     ).first()
 
@@ -265,18 +287,25 @@ def update_application_status(db, application_id, status):
         application.status = status
 
         db.commit()
+
         db.refresh(application)
 
     return application
 
 
 # ======================
-# Upload PDF
+# UPLOAD PDF
 # ======================
 
-def upload_application_file(db, application_id, file_path):
+def upload_application_file(
+    db,
+    application_id,
+    file_path
+):
 
-    application = db.query(models.Application).filter(
+    application = db.query(
+        models.Application
+    ).filter(
         models.Application.id == application_id
     ).first()
 
@@ -285,6 +314,7 @@ def upload_application_file(db, application_id, file_path):
         application.file = file_path
 
         db.commit()
+
         db.refresh(application)
 
     return application
@@ -294,7 +324,10 @@ def upload_application_file(db, application_id, file_path):
 # SUPERVISION
 # ======================
 
-def create_supervision(db, supervision):
+def create_supervision(
+    db,
+    supervision
+):
 
     db_supervision = models.Supervision(
         teacher_id=supervision.teacher_id,
@@ -307,7 +340,9 @@ def create_supervision(db, supervision):
     )
 
     db.add(db_supervision)
+
     db.commit()
+
     db.refresh(db_supervision)
 
     return db_supervision
@@ -315,10 +350,15 @@ def create_supervision(db, supervision):
 
 def get_supervisions(db):
 
-    return db.query(models.Supervision).all()
+    return db.query(
+        models.Supervision
+    ).all()
 
 
-def get_teacher_supervisions(db, teacher_id):
+def get_teacher_supervisions(
+    db,
+    teacher_id
+):
 
     result = db.query(
 
@@ -331,8 +371,6 @@ def get_teacher_supervisions(db, teacher_id):
         ),
 
         models.Company.company_name,
-
-        models.Company.county,
 
         models.Company.industry,
 
@@ -347,7 +385,9 @@ def get_teacher_supervisions(db, teacher_id):
         ),
 
         models.Supervision.date,
+
         models.Supervision.type,
+
         models.Supervision.status
 
     ).join(
@@ -404,7 +444,10 @@ def admin_dashboard(db: Session):
     }
 
 
-def teacher_dashboard(db: Session, teacher_id):
+def teacher_dashboard(
+    db: Session,
+    teacher_id
+):
 
     student_count = db.query(
         models.Student
@@ -434,9 +477,15 @@ def teacher_dashboard(db: Session, teacher_id):
 # ASSIGN TEACHER
 # ======================
 
-def assign_teacher(db, student_id, teacher_id):
+def assign_teacher(
+    db,
+    student_id,
+    teacher_id
+):
 
-    student = db.query(models.Student).filter(
+    student = db.query(
+        models.Student
+    ).filter(
         models.Student.id == student_id
     ).first()
 
@@ -445,6 +494,7 @@ def assign_teacher(db, student_id, teacher_id):
         student.teacher_id = teacher_id
 
         db.commit()
+
         db.refresh(student)
 
     return student
@@ -454,7 +504,10 @@ def assign_teacher(db, student_id, teacher_id):
 # COMPANY CRUD
 # ======================
 
-def create_company(db, company):
+def create_company(
+    db,
+    company
+):
 
     db_company = models.Company(
         company_name=company.company_name,
@@ -468,11 +521,17 @@ def create_company(db, company):
     )
 
     db.add(db_company)
+
     db.commit()
+
     db.refresh(db_company)
 
     return db_company
 
+
+# ======================
+# SEARCH + FILTER COMPANY
+# ======================
 
 def get_companies(
     db,
@@ -486,43 +545,80 @@ def get_companies(
 
     query = db.query(models.Company)
 
+    # search text
     if search:
+
         query = query.filter(
-            (models.Company.company_name.ilike(f"%{search}%")) |
-            (models.Company.address.ilike(f"%{search}%"))
+
+            or_(
+
+                models.Company.company_name.ilike(
+                    f"%{search}%"
+                ),
+
+                models.Company.address.ilike(
+                    f"%{search}%"
+                ),
+
+                models.Company.county.ilike(
+                    f"%{search}%"
+                ),
+
+                models.Company.industry.ilike(
+                    f"%{search}%"
+                )
+
+            )
+
         )
 
+    # filter county
     if county:
+
         query = query.filter(
-            models.Company.county.ilike(f"%{county}%")
+            models.Company.county == county
         )
 
+    # filter industry
     if industry:
+
         query = query.filter(
-            models.Company.industry.ilike(f"%{industry}%")
+            models.Company.industry == industry
         )
 
+    # filter allowance
     if allowance:
+
         query = query.filter(
-            models.Company.allowance.ilike(f"%{allowance}%")
+            models.Company.allowance == allowance
         )
 
+    # filter accommodation
     if accommodation:
+
         query = query.filter(
-            models.Company.accommodation.ilike(f"%{accommodation}%")
+            models.Company.accommodation == accommodation
         )
 
+    # filter shuttle
     if shuttle:
+
         query = query.filter(
-            models.Company.shuttle.ilike(f"%{shuttle}%")
+            models.Company.shuttle == shuttle
         )
 
     return query.all()
 
 
-def update_company(db, company_id, company):
+def update_company(
+    db,
+    company_id,
+    company
+):
 
-    db_company = db.query(models.Company).filter(
+    db_company = db.query(
+        models.Company
+    ).filter(
         models.Company.id == company_id
     ).first()
 
@@ -538,14 +634,20 @@ def update_company(db, company_id, company):
         db_company.welfare = company.welfare
 
         db.commit()
+
         db.refresh(db_company)
 
     return db_company
 
 
-def delete_company(db, company_id):
+def delete_company(
+    db,
+    company_id
+):
 
-    company = db.query(models.Company).filter(
+    company = db.query(
+        models.Company
+    ).filter(
         models.Company.id == company_id
     ).first()
 
@@ -556,41 +658,3 @@ def delete_company(db, company_id):
         db.commit()
 
     return company
-
-# ======================
-# TEACHER PROFILE
-# ======================
-
-def get_teacher_profile(
-    db,
-    username
-):
-
-    return db.query(models.Teacher).filter(
-        models.Teacher.email == username
-    ).first()
-
-
-def update_teacher_profile(
-    db,
-    username,
-    teacher_data
-):
-
-    teacher = db.query(models.Teacher).filter(
-        models.Teacher.email == username
-    ).first()
-
-    if not teacher:
-        return None
-
-    teacher.rank = teacher_data.rank
-    teacher.first_name = teacher_data.first_name
-    teacher.last_name = teacher_data.last_name
-    teacher.email = teacher_data.email
-    teacher.role = teacher_data.role
-
-    db.commit()
-    db.refresh(teacher)
-
-    return teacher
