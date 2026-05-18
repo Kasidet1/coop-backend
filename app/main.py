@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 import shutil
 import os
 
-from . import schemas, models, crud
+from . import schemas, crud
 from .database import get_db
 from .auth import create_access_token, get_current_user, require_role
 
@@ -231,6 +231,47 @@ def read_supervision(
 # TEACHER
 # ======================
 
+@app.get("/teacher/me")
+def teacher_me(
+    db: Session = Depends(get_db),
+    user=Depends(require_role("teacher"))
+):
+
+    teacher = crud.get_teacher_profile(
+        db,
+        user["sub"]
+    )
+
+    if not teacher:
+        raise HTTPException(
+            status_code=404,
+            detail="Teacher not found"
+        )
+
+    return teacher
+
+
+@app.put("/teacher/me")
+def update_teacher_me(
+    teacher_data: schemas.TeacherUpdate,
+    db: Session = Depends(get_db),
+    user=Depends(require_role("teacher"))
+):
+
+    teacher = crud.update_teacher_profile(
+        db,
+        user["sub"],
+        teacher_data
+    )
+
+    if not teacher:
+        raise HTTPException(
+            status_code=404,
+            detail="Teacher not found"
+        )
+
+    return teacher
+
 @app.get("/teacher/students")
 def teacher_students(
     db: Session = Depends(get_db),
@@ -277,7 +318,6 @@ def teacher_dashboard(
     )
 
 
-# หน้าแสดงนิเทศของอาจารย์
 @app.get("/teacher/supervisions")
 def teacher_supervisions(
     db: Session = Depends(get_db),
