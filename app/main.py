@@ -262,8 +262,9 @@ def teacher_students(
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found")
 
-    return crud.get_teacher_students(db, teacher.id)
+    teacher_name = f"{teacher.first_name} {teacher.last_name}"
 
+    return crud.get_teacher_students(db, teacher_name)
 
 @app.get("/teacher/dashboard")
 def teacher_dashboard(
