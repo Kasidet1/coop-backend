@@ -161,9 +161,11 @@ def get_teacher_by_username(db, username):
     ).first()
 
 
-def get_teacher_students(db, teacher_id):
-    # ❌ teacher_id relationship removed → return empty or all students
-    return []
+def get_teacher_students(db: Session, teacher_name: str):
+
+    return db.query(models.TeacherStudent).filter(
+        models.TeacherStudent.teacher_name == teacher_name
+    ).all()
 
 
 # ======================
