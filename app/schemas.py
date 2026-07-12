@@ -236,3 +236,27 @@ class TeacherDashboard(BaseModel):
     students: int
     supervision_count: int
     supervisions: List[TeacherSupervision]
+
+
+class TeacherStudentCreate(BaseModel):
+    teacher_name: str
+    company_name: str
+    student_id: str
+    student_name: str
+    department: str | None = None
+    industry: str | None = None
+    work_modes: str | None = None
+
+
+class TeacherStudent(BaseModel):
+    id: int
+    teacher_name: str
+    company_name: str
+    student_id: str
+    student_name: str
+    department: str | None
+    industry: str | None
+    work_modes: str | None
+
+    class Config:
+        from_attributes = True
