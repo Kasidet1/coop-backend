@@ -174,3 +174,15 @@ class Supervision(Base):
         "Company",
         back_populates="supervisions"
     )
+
+class TeacherStudent(Base):
+    __tablename__ = "teacher_students"
+
+    id = Column(Integer, primary_key=True, index=True)
+    teacher_name = Column(String(255), nullable=False)
+    company_name = Column(String(255), nullable=False)
+    student_id = Column(String(20), nullable=False)
+    student_name = Column(String(255), nullable=False)
+    department = Column(String(255))
+    industry = Column(String(255))
+    work_modes = Column(String(100))
