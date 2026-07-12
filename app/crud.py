@@ -415,3 +415,75 @@ def delete_company(db, company_id):
     db.commit()
 
     return company
+
+# ======================
+# TEACHER STUDENTS
+# ======================
+
+def create_teacher_student(db: Session, teacher_student):
+
+    db_teacher_student = models.TeacherStudent(
+        teacher_name=teacher_student.teacher_name,
+        company_name=teacher_student.company_name,
+        student_id=teacher_student.student_id,
+        student_name=teacher_student.student_name,
+        department=teacher_student.department,
+        industry=teacher_student.industry,
+        work_modes=teacher_student.work_modes
+    )
+
+    db.add(db_teacher_student)
+    db.commit()
+    db.refresh(db_teacher_student)
+
+    return db_teacher_student
+
+
+def get_all_teacher_students(db: Session):
+
+    return db.query(models.TeacherStudent).all()
+
+
+def get_teacher_student_by_id(db: Session, teacher_student_id):
+
+    return db.query(models.TeacherStudent).filter(
+        models.TeacherStudent.id == teacher_student_id
+    ).first()
+
+
+def update_teacher_student(db: Session, teacher_student_id, teacher_student):
+
+    db_teacher_student = db.query(models.TeacherStudent).filter(
+        models.TeacherStudent.id == teacher_student_id
+    ).first()
+
+    if not db_teacher_student:
+        return None
+
+    db_teacher_student.teacher_name = teacher_student.teacher_name
+    db_teacher_student.company_name = teacher_student.company_name
+    db_teacher_student.student_id = teacher_student.student_id
+    db_teacher_student.student_name = teacher_student.student_name
+    db_teacher_student.department = teacher_student.department
+    db_teacher_student.industry = teacher_student.industry
+    db_teacher_student.work_modes = teacher_student.work_modes
+
+    db.commit()
+    db.refresh(db_teacher_student)
+
+    return db_teacher_student
+
+
+def delete_teacher_student(db: Session, teacher_student_id):
+
+    db_teacher_student = db.query(models.TeacherStudent).filter(
+        models.TeacherStudent.id == teacher_student_id
+    ).first()
+
+    if not db_teacher_student:
+        return None
+
+    db.delete(db_teacher_student)
+    db.commit()
+
+    return db_teacher_student
