@@ -121,6 +121,24 @@ def update_my_student_profile(
 
     return updated
 
+# ======================
+# STUDENT TEACHER
+# ======================
+
+@app.get("/student/teacher")
+def get_my_teacher(
+    db: Session = Depends(get_db),
+    user=Depends(require_role("student"))
+):
+
+    student = crud.get_student_profile(db, user["sub"])
+
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    student_name = f"{student.first_name} {student.last_name}"
+
+    return crud.get_student_teacher(db, student_name)
 
 # ======================
 # ADMIN STUDENT MANAGEMENT (OPTIONAL)
@@ -405,19 +423,3 @@ def delete_company(
     return {"message": "Company deleted"}
 
 
-# ======================
-# STUDENT TEACHER
-# ======================
-
-@app.get("/student/teacher")
-def get_my_teacher(
-    db: Session = Depends(get_db),
-    user=Depends(require_role("student"))
-):
-
-    student = crud.get_student_profile(db, user["sub"])
-
-    if not student:
-        raise HTTPException(status_code=404, detail="Student not found")
-
-    return crud.get_student_teacher(db, student.student_id)
