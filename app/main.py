@@ -272,9 +272,18 @@ def read_supervision(
 @app.get("/teacher/students")
 def teacher_students(
     db: Session = Depends(get_db),
-    user=Depends(require_role("teacher"))
+    user=Depends(get_current_user)
 ):
 
+    # อนุญาตเฉพาะ teacher และ admin
+    if user["role"] not in ["teacher", "admin"]:
+        raise HTTPException(status_code=403, detail="Permission denied")
+
+    # ถ้าเป็น admin
+    if user["role"] == "admin":
+        return crud.get_all_teacher_students(db)
+
+    # ถ้าเป็น teacher
     teacher = crud.get_teacher_by_username(db, user["sub"])
 
     if not teacher:
