@@ -68,6 +68,32 @@ def login(user: schemas.Login, db: Session = Depends(get_db)):
     }
 
 
+@app.put("/users/{user_id}/role")
+def update_user_role(
+    user_id: int,
+    data: schemas.UpdateUserRole,
+    db: Session = Depends(get_db),
+    user=Depends(require_role("admin"))
+):
+
+    updated_user = crud.update_user_role(
+        db,
+        user_id,
+        data.role
+    )
+
+    if not updated_user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+
+    return {
+        "message": "Role updated successfully",
+        "user": updated_user
+    }
+
+
 # ======================
 # STUDENT (SECURE SELF PROFILE SYSTEM)
 # ======================
@@ -431,28 +457,4 @@ def delete_company(
 
     return {"message": "Company deleted"}
 
-@app.put("/users/{user_id}/role")
-def update_user_role(
-    user_id: int,
-    data: schemas.UpdateUserRole,
-    db: Session = Depends(get_db),
-    user=Depends(require_role("admin"))
-):
-
-    updated_user = crud.update_user_role(
-        db,
-        user_id,
-        data.role
-    )
-
-    if not updated_user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
-
-    return {
-        "message": "Role updated successfully",
-        "user": updated_user
-    }
 
