@@ -403,3 +403,21 @@ def delete_company(
         raise HTTPException(status_code=404, detail="Company not found")
 
     return {"message": "Company deleted"}
+
+
+# ======================
+# STUDENT TEACHER
+# ======================
+
+@app.get("/student/teacher")
+def get_my_teacher(
+    db: Session = Depends(get_db),
+    user=Depends(require_role("student"))
+):
+
+    student = crud.get_student_profile(db, user["sub"])
+
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    return crud.get_student_teacher(db, student.student_id)
