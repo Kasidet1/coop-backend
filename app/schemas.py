@@ -260,3 +260,7 @@ class TeacherStudent(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class UpdateUserRole(BaseModel):
+    role: str
