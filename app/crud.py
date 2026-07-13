@@ -489,3 +489,10 @@ def delete_teacher_student(db: Session, teacher_student_id):
     db.commit()
 
     return db_teacher_student
+
+
+def get_student_teacher(db: Session, student_name: str):
+
+    return db.query(models.TeacherStudent).filter(
+        models.TeacherStudent.student_name == student_name
+    ).all()
