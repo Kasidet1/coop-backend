@@ -496,3 +496,20 @@ def get_student_teacher(db: Session, student_name: str):
     return db.query(models.TeacherStudent).filter(
         models.TeacherStudent.student_name == student_name
     ).all()
+
+
+def update_user_role(db: Session, user_id: int, role: str):
+
+    user = db.query(models.User).filter(
+        models.User.id == user_id
+    ).first()
+
+    if not user:
+        return None
+
+    user.role = role
+
+    db.commit()
+    db.refresh(user)
+
+    return user
