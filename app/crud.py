@@ -115,7 +115,9 @@ def update_student_profile(db, student_id, student_data):
 # ======================
 # USER
 # ======================
-
+def get_users(db: Session):
+    return db.query(models.User).all()
+    
 def create_user(db, user):
 
     db_user = models.User(
