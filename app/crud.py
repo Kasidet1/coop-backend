@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func, or_, cast, String
+from sqlalchemy import func, or_
 
 from . import models
 
@@ -221,48 +221,7 @@ def create_application(db: Session, application):
 
 def get_applications(db: Session):
 
-    results = (
-        db.query(
-            models.Application.id.label("application_id"),
-
-            # นักศึกษา
-            models.Student.student_id.label("student_id"),
-            models.Student.first_name.label("first_name"),
-            models.Student.last_name.label("last_name"),
-
-            # สถานประกอบการ
-            models.Company.company_name.label("company_name"),
-
-            # สถานะคำร้อง
-            models.Application.status.label("status")
-        )
-        .join(
-            models.Student,
-            models.Application.student_id == models.Student.id
-        )
-        .join(
-            models.Company,
-            cast(models.Company.id, String) == cast(
-                models.Application.company_id,
-                String
-            )
-        )
-        .all()
-    )
-
-    return [
-        {
-            "application_id": row.application_id,
-            "student_id": row.student_id,
-            "first_name": row.first_name,
-            "last_name": row.last_name,
-            "student_name": f"{row.first_name} {row.last_name}",
-            "company_name": row.company_name,
-            "status": row.status
-        }
-        for row in results
-    ]
-
+    return db.query(models.Application).all()
 
 
 def update_application_status(db, application_id, status):
