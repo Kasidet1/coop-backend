@@ -218,40 +218,47 @@ def create_application(db: Session, application):
 
     return db_application
 
-
 def get_applications(db: Session):
-    results = (
-        db.query(
-            models.Application.id.label("application_id"),
-            models.Student.student_id.label("student_id"),
-            models.Student.first_name.label("first_name"),
-            models.Student.last_name.label("last_name"),
-            models.Company.company_name.label("company_name"),
-            models.Application.status.label("status")
-        )
-        .join(
-            models.Student,
-            models.Application.student_id == models.Student.id
-        )
-        .join(
-            models.Company,
-            models.Application.company_id == models.Company.id
-        )
-        .all()
-    )
+    applications = db.query(models.Application).all()
 
-    return [
-        {
-            "application_id": row.application_id,
-            "student_id": row.student_id,
-            "first_name": row.first_name,
-            "last_name": row.last_name,
-            "student_name": f"{row.first_name} {row.last_name}",
-            "company_name": row.company_name,
-            "status": row.status
-        }
-        for row in results
-    ]
+    results = []
+
+    for application in applications:
+
+        # หานักศึกษาจาก students.id
+        student = (
+            db.query(models.Student)
+            .filter(models.Student.id == application.student_id)
+            .first()
+        )
+
+        # หาบริษัทจาก companies.id
+        company = (
+            db.query(models.Company)
+            .filter(models.Company.id == application.company_id)
+            .first()
+        )
+
+        results.append({
+            "application_id": application.id,
+
+            "student_id": student.student_id if student else None,
+            "first_name": student.first_name if student else None,
+            "last_name": student.last_name if student else None,
+
+            "student_name": (
+                f"{student.first_name} {student.last_name}"
+                if student
+                else None
+            ),
+
+            "company_name": company.company_name if company else None,
+
+            "status": application.status
+        })
+
+    return results
+
 
 
 def update_application_status(db, application_id, status):
