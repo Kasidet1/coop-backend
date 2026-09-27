@@ -218,6 +218,7 @@ def create_application(db: Session, application):
 
     return db_application
 
+
 def get_applications(db: Session):
     applications = db.query(models.Application).all()
 
@@ -225,25 +226,32 @@ def get_applications(db: Session):
 
     for application in applications:
 
-        # หานักศึกษาจาก students.id
+        # applications.student_id เก็บ "รหัสนักศึกษา"
+        # เช่น "65100521"
         student = (
             db.query(models.Student)
-            .filter(models.Student.id == application.student_id)
+            .filter(
+                models.Student.student_id == application.student_id
+            )
             .first()
         )
 
-        # หาบริษัทจาก companies.id
+        # applications.company_id ยังใช้ companies.id
         company = (
             db.query(models.Company)
-            .filter(models.Company.id == application.company_id)
+            .filter(
+                models.Company.id == application.company_id
+            )
             .first()
         )
 
         results.append({
             "application_id": application.id,
 
-            "student_id": student.student_id if student else None,
+            "student_id": student.student_id if student else application.student_id,
+
             "first_name": student.first_name if student else None,
+
             "last_name": student.last_name if student else None,
 
             "student_name": (
@@ -252,12 +260,17 @@ def get_applications(db: Session):
                 else None
             ),
 
-            "company_name": company.company_name if company else None,
+            "company_name": (
+                company.company_name
+                if company
+                else None
+            ),
 
             "status": application.status
         })
 
     return results
+
 
 
 
