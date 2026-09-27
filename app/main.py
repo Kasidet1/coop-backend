@@ -67,7 +67,13 @@ def login(user: schemas.Login, db: Session = Depends(get_db)):
         "username": db_user.username
     }
 
-
+@app.get("/users")
+def get_users(
+    db: Session = Depends(get_db),
+    user=Depends(require_role("admin"))
+):
+    return crud.get_users(db)
+    
 @app.put("/users/{user_id}/role")
 def update_user_role(
     user_id: int,
