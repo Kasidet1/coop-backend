@@ -207,9 +207,21 @@ def delete_student(
 def apply_company(
     application: schemas.ApplicationCreate,
     db: Session = Depends(get_db),
-    user=Depends(get_current_user)
+    user=Depends(require_role("student"))
 ):
-    return crud.create_application(db, application)
+    result = crud.create_application(
+        db,
+        application,
+        user
+    )
+
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail="Student or company not found"
+        )
+
+    return result
 
 
 @app.get("/applications")
