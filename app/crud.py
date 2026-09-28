@@ -470,22 +470,47 @@ def get_student_teacher(
 
 def create_application(
     db: Session,
-    application
+    application,
+    user
 ):
-    # หา Student จากรหัสนักศึกษา
+    # ==============================
+    # หา Student จาก JWT
+    # user["sub"] = student_id
+    # เช่น "65100521"
+    # ==============================
+
     student = db.query(
         models.Student
     ).filter(
-        models.Student.student_id == application.student_id
+        models.Student.student_id == str(user["sub"])
     ).first()
 
     if not student:
         return None
 
-    # สร้าง Application โดยใช้ students.id
+    # ==============================
+    # ตรวจสอบบริษัท
+    # ==============================
+
+    company = db.query(
+        models.Company
+    ).filter(
+        models.Company.id == application.company_id
+    ).first()
+
+    if not company:
+        return None
+
+    # ==============================
+    # สร้างใบสมัคร
+    #
+    # applications.student_id
+    # = students.id
+    # ==============================
+
     db_application = models.Application(
         student_id=student.id,
-        company_id=application.company_id,
+        company_id=company.id,
         status="pending"
     )
 
