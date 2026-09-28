@@ -539,10 +539,10 @@ def get_supervisions(db: Session):
 
 def get_teacher_supervisions(
     db: Session,
-    teacher_id
+    teacher_id: int
 ):
 
-    result = db.query(
+    rows = db.query(
 
         models.Teacher.first_name.label(
             "teacher_first_name"
@@ -595,6 +595,42 @@ def get_teacher_supervisions(
         models.Teacher.id == teacher_id
 
     ).all()
+
+
+    # ========================================================
+    # แปลง SQLAlchemy Row -> Dictionary
+    # เพื่อให้ FastAPI ส่ง JSON ได้
+    # ========================================================
+
+    result = []
+
+    for row in rows:
+
+        result.append({
+
+            "teacher_name": (
+                f"{row.teacher_first_name} "
+                f"{row.teacher_last_name}"
+            ),
+
+            "company_name": row.company_name,
+
+            "industry": row.industry,
+
+            "student_id": row.student_id,
+
+            "student_name": (
+                f"{row.student_first_name} "
+                f"{row.student_last_name}"
+            ),
+
+            "date": row.date,
+
+            "type": row.type,
+
+            "status": row.status
+        })
+
 
     return result
 
