@@ -153,7 +153,6 @@ class Company(BaseModel):
 # ======================
 
 class ApplicationCreate(BaseModel):
-    student_id: int
     company_id: int
 
 
