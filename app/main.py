@@ -286,7 +286,20 @@ def create_supervision(
     db: Session = Depends(get_db),
     user=Depends(require_role("teacher"))
 ):
-    return crud.create_supervision(db, supervision)
+
+    result, error = crud.create_supervision(
+        db,
+        supervision,
+        user
+    )
+
+    if error:
+        raise HTTPException(
+            status_code=400,
+            detail=error
+        )
+
+    return result
 
 
 @app.get("/supervision")
