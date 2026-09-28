@@ -354,6 +354,7 @@ def teacher_supervisions(
     db: Session = Depends(get_db),
     user=Depends(require_role("teacher"))
 ):
+
     teacher = crud.get_teacher_by_username(
         db,
         user["sub"]
@@ -365,13 +366,15 @@ def teacher_supervisions(
             detail="Teacher not found"
         )
 
-    teacher_name = f"{teacher.first_name} {teacher.last_name}"
+    teacher_name = (
+        f"{teacher.first_name} "
+        f"{teacher.last_name}"
+    )
 
     return crud.get_teacher_supervisions(
         db,
         teacher_name
     )
-
 
 # ======================
 # TEACHER PROFILE
