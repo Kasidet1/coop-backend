@@ -328,11 +328,11 @@ def teacher_students(
 @app.get("/teacher/dashboard")
 def teacher_dashboard(
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    user=Depends(require_role("teacher"))
 ):
     teacher = crud.get_teacher_by_username(
         db,
-        current_user.username
+        user["sub"]
     )
 
     if not teacher:
@@ -354,13 +354,23 @@ def teacher_supervisions(
     db: Session = Depends(get_db),
     user=Depends(require_role("teacher"))
 ):
-
-    teacher = crud.get_teacher_by_username(db, user["sub"])
+    teacher = crud.get_teacher_by_username(
+        db,
+        user["sub"]
+    )
 
     if not teacher:
-        raise HTTPException(status_code=404, detail="Teacher not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Teacher not found"
+        )
 
-    return crud.get_teacher_supervisions(db, teacher.id)
+    teacher_name = f"{teacher.first_name} {teacher.last_name}"
+
+    return crud.get_teacher_supervisions(
+        db,
+        teacher_name
+    )
 
 
 # ======================
