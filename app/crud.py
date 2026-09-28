@@ -619,30 +619,27 @@ def get_supervisions(
 
 def get_teacher_supervisions(db: Session, teacher_name: str):
 
+    # ========================================================
+    # หา supervision ของนักศึกษาที่อาจารย์คนนี้ดูแล
+    # โดยใช้ teacher_students เป็นตัวกำหนดรายชื่อนักศึกษา
+    # ========================================================
+
     rows = db.query(
-        models.Teacher.first_name.label("teacher_first_name"),
-        models.Teacher.last_name.label("teacher_last_name"),
+        models.TeacherStudent.student_id.label("student_id"),
+        models.TeacherStudent.student_name.label("student_name"),
+        models.TeacherStudent.company_name.label("assigned_company_name"),
+        models.TeacherStudent.industry.label("assigned_industry"),
 
-        models.TeacherStudent.student_id.label(
-            "assigned_student_id"
-        ),
-
-        models.TeacherStudent.student_name.label(
-            "assigned_student_name"
-        ),
-
-        models.TeacherStudent.company_name.label(
-            "assigned_company_name"
-        ),
-
-        models.TeacherStudent.industry.label(
-            "assigned_industry"
-        ),
-
+        models.Supervision.id.label("supervision_id"),
         models.Supervision.date,
         models.Supervision.type,
         models.Supervision.status,
-        models.Supervision.note
+        models.Supervision.note,
+
+        models.Teacher.first_name.label("teacher_first_name"),
+        models.Teacher.last_name.label("teacher_last_name"),
+
+        models.Company.company_name.label("supervision_company_name")
 
     ).select_from(
         models.TeacherStudent
@@ -662,32 +659,35 @@ def get_teacher_supervisions(db: Session, teacher_name: str):
         models.Supervision.teacher_id
         == models.Teacher.id
 
-    ).filter(
-        models.TeacherStudent.teacher_name
-        == teacher_name
+    ).outerjoin(
+        models.Company,
+        models.Supervision.company_id
+        == models.Company.id
 
     ).filter(
-        models.Teacher.first_name
-        + " "
-        + models.Teacher.last_name
-        == teacher_name
-
+        models.TeacherStudent.teacher_name == teacher_name
     ).all()
 
     result = []
 
     for row in rows:
+
         result.append({
+            "supervision_id": row.supervision_id,
+
             "teacher_name": (
                 f"{row.teacher_first_name} "
                 f"{row.teacher_last_name}"
             ),
 
-            "student_id": row.assigned_student_id,
+            "student_id": row.student_id,
 
-            "student_name": row.assigned_student_name,
+            "student_name": row.student_name,
 
-            "company_name": row.assigned_company_name,
+            "company_name": (
+                row.supervision_company_name
+                or row.assigned_company_name
+            ),
 
             "industry": row.assigned_industry,
 
@@ -701,20 +701,6 @@ def get_teacher_supervisions(db: Session, teacher_name: str):
         })
 
     return result
-
-
-def get_teacher_supervisions_by_name(
-    db: Session,
-    teacher_name: str
-):
-    """
-    ใช้ teacher_name เป็นตัวกำหนดอาจารย์
-    """
-
-    return get_teacher_supervisions(
-        db,
-        teacher_name
-    )
 
 
 # ============================================================
