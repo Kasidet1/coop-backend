@@ -78,6 +78,7 @@ class StudentUpdate(BaseModel):
     last_name: str
     faculty: str
     major: str
+    username: str
     phone: str
     semester: str
 
