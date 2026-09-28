@@ -472,8 +472,19 @@ def create_application(
     db: Session,
     application
 ):
+    # หา Student จากรหัสนักศึกษา
+    student = db.query(
+        models.Student
+    ).filter(
+        models.Student.student_id == application.student_id
+    ).first()
+
+    if not student:
+        return None
+
+    # สร้าง Application โดยใช้ students.id
     db_application = models.Application(
-        student_id=application.student_id,
+        student_id=student.id,
         company_id=application.company_id,
         status="pending"
     )
