@@ -336,7 +336,9 @@ def teacher_dashboard(
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found")
 
-    return crud.teacher_dashboard(db, teacher.id)
+    teacher_name = f"{teacher.first_name} {teacher.last_name}"
+
+return crud.teacher_dashboard(db, teacher_name)
 
 
 @app.get("/teacher/supervisions")
