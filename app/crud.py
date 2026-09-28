@@ -12,24 +12,29 @@ def get_students(db: Session):
     return db.query(models.Student).all()
 
 
-def get_student_by_student_id(db: Session, student_id):
-    return db.query(models.Student).filter(
+def get_student_by_student_id(
+    db: Session,
+    student_id
+):
+    return db.query(
+        models.Student
+    ).filter(
         models.Student.student_id == student_id
     ).first()
 
 
-def create_student(db: Session, student):
-
+def create_student(
+    db: Session,
+    student
+):
     new_student = models.Student(
         student_id=student.student_id,
         first_name=student.first_name,
         last_name=student.last_name,
         faculty=student.faculty,
         major=student.major,
-        username=student.student_id,
         phone=student.phone,
-        semester=student.semester,
-        password=student.password
+        semester=student.semester
     )
 
     db.add(new_student)
@@ -39,9 +44,14 @@ def create_student(db: Session, student):
     return new_student
 
 
-def update_student(db: Session, student_id, student):
-
-    db_student = db.query(models.Student).filter(
+def update_student(
+    db: Session,
+    student_id,
+    student
+):
+    db_student = db.query(
+        models.Student
+    ).filter(
         models.Student.id == student_id
     ).first()
 
@@ -53,13 +63,8 @@ def update_student(db: Session, student_id, student):
     db_student.last_name = student.last_name
     db_student.faculty = student.faculty
     db_student.major = student.major
-
-    # username ของนักศึกษาใช้ student_id
-    db_student.username = student.student_id
-
     db_student.phone = student.phone
     db_student.semester = student.semester
-    db_student.password = student.password
 
     db.commit()
     db.refresh(db_student)
@@ -67,9 +72,13 @@ def update_student(db: Session, student_id, student):
     return db_student
 
 
-def delete_student(db: Session, student_id):
-
-    student = db.query(models.Student).filter(
+def delete_student(
+    db: Session,
+    student_id
+):
+    student = db.query(
+        models.Student
+    ).filter(
         models.Student.id == student_id
     ).first()
 
@@ -86,16 +95,25 @@ def delete_student(db: Session, student_id):
 # STUDENT PROFILE
 # ============================================================
 
-def get_student_profile(db: Session, student_id):
-
-    return db.query(models.Student).filter(
+def get_student_profile(
+    db: Session,
+    student_id
+):
+    return db.query(
+        models.Student
+    ).filter(
         models.Student.student_id == student_id
     ).first()
 
 
-def update_student_profile(db: Session, student_id, student_data):
-
-    student = db.query(models.Student).filter(
+def update_student_profile(
+    db: Session,
+    student_id,
+    student_data
+):
+    student = db.query(
+        models.Student
+    ).filter(
         models.Student.student_id == student_id
     ).first()
 
@@ -120,11 +138,15 @@ def update_student_profile(db: Session, student_id, student_data):
 # ============================================================
 
 def get_users(db: Session):
-    return db.query(models.User).all()
+    return db.query(
+        models.User
+    ).all()
 
 
-def create_user(db: Session, user):
-
+def create_user(
+    db: Session,
+    user
+):
     db_user = models.User(
         username=user.username,
         password=user.password,
@@ -138,13 +160,19 @@ def create_user(db: Session, user):
     return db_user
 
 
-def login_user(db: Session, username, password):
+def login_user(
+    db: Session,
+    username,
+    password
+):
 
     # --------------------------------------------------------
     # LOGIN USER
     # --------------------------------------------------------
 
-    user = db.query(models.User).filter(
+    user = db.query(
+        models.User
+    ).filter(
         models.User.username == username
     ).first()
 
@@ -155,23 +183,33 @@ def login_user(db: Session, username, password):
     # LOGIN STUDENT
     # --------------------------------------------------------
 
-    student = db.query(models.Student).filter(
+    student = db.query(
+        models.Student
+    ).filter(
         models.Student.student_id == username
     ).first()
 
-    if student and password == student.password:
-
-        # กำหนด role ให้ object ที่ส่งกลับ
-        student.role = "student"
-
-        return student
+    # --------------------------------------------------------
+    # IMPORTANT
+    #
+    # ตอนนี้ Student model ไม่มี password
+    # ดังนั้นไม่ตรวจ student.password
+    #
+    # ถ้าระบบของคุณมี password ใน database จริง
+    # ต้องเพิ่ม Column password ใน models.Student ก่อน
+    # --------------------------------------------------------
 
     return None
 
 
-def update_user_role(db: Session, user_id: int, role: str):
-
-    user = db.query(models.User).filter(
+def update_user_role(
+    db: Session,
+    user_id: int,
+    role: str
+):
+    user = db.query(
+        models.User
+    ).filter(
         models.User.id == user_id
     ).first()
 
@@ -190,23 +228,36 @@ def update_user_role(db: Session, user_id: int, role: str):
 # TEACHER
 # ============================================================
 
-def get_teacher_by_username(db: Session, username):
-
-    return db.query(models.Teacher).filter(
+def get_teacher_by_username(
+    db: Session,
+    username
+):
+    return db.query(
+        models.Teacher
+    ).filter(
         models.Teacher.username == username
     ).first()
 
 
-def get_teacher_profile(db: Session, username):
-
-    return db.query(models.Teacher).filter(
+def get_teacher_profile(
+    db: Session,
+    username
+):
+    return db.query(
+        models.Teacher
+    ).filter(
         models.Teacher.username == username
     ).first()
 
 
-def update_teacher_profile(db: Session, username, teacher_data):
-
-    teacher = db.query(models.Teacher).filter(
+def update_teacher_profile(
+    db: Session,
+    username,
+    teacher_data
+):
+    teacher = db.query(
+        models.Teacher
+    ).filter(
         models.Teacher.username == username
     ).first()
 
@@ -218,7 +269,7 @@ def update_teacher_profile(db: Session, username, teacher_data):
     teacher.first_name = teacher_data.first_name
     teacher.last_name = teacher_data.last_name
 
-    # ไม่ควรให้ teacher เปลี่ยน role เอง
+    # ไม่ให้ Teacher เปลี่ยน role ของตัวเอง
     # teacher.role = teacher_data.role
 
     db.commit()
@@ -240,17 +291,24 @@ def create_teacher_student(
     สร้างข้อมูลนักศึกษาที่อาจารย์ดูแล
 
     teacher_name ต้องมาจาก Backend
-    จากอาจารย์ที่ Login อยู่
-    ไม่ควรรับ teacher_name จาก Frontend
+    ไม่รับจาก Frontend เพื่อป้องกัน
+    การสร้างข้อมูลในชื่ออาจารย์คนอื่น
     """
 
     db_teacher_student = models.TeacherStudent(
+
         teacher_name=teacher_name,
+
         company_name=teacher_student.company_name,
+
         student_id=teacher_student.student_id,
+
         student_name=teacher_student.student_name,
+
         department=teacher_student.department,
+
         industry=teacher_student.industry,
+
         work_modes=teacher_student.work_modes
     )
 
@@ -261,7 +319,12 @@ def create_teacher_student(
     return db_teacher_student
 
 
-def get_all_teacher_students(db: Session):
+def get_all_teacher_students(
+    db: Session
+):
+    """
+    Admin ใช้ดูนักศึกษาที่อาจารย์ทุกคนดูแล
+    """
 
     return db.query(
         models.TeacherStudent
@@ -273,13 +336,14 @@ def get_teacher_students(
     teacher_name: str
 ):
     """
-    ดึงเฉพาะนักศึกษาที่อาจารย์คนนี้ดูแล
+    Teacher ใช้ดูเฉพาะนักศึกษาที่ตัวเองดูแล
     """
 
     return db.query(
         models.TeacherStudent
     ).filter(
-        models.TeacherStudent.teacher_name == teacher_name
+        models.TeacherStudent.teacher_name ==
+        teacher_name
     ).all()
 
 
@@ -289,15 +353,17 @@ def get_teacher_student_by_id(
     teacher_name: str
 ):
     """
-    ดึงข้อมูลนักศึกษาตาม ID
-    และต้องเป็นนักศึกษาที่อาจารย์คนนี้ดูแลเท่านั้น
+    ดึงข้อมูลนักศึกษาที่อาจารย์ดูแล
+    และต้องเป็นของอาจารย์คนนี้เท่านั้น
     """
 
     return db.query(
         models.TeacherStudent
     ).filter(
-        models.TeacherStudent.id == teacher_student_id,
-        models.TeacherStudent.teacher_name == teacher_name
+        models.TeacherStudent.id ==
+        teacher_student_id,
+        models.TeacherStudent.teacher_name ==
+        teacher_name
     ).first()
 
 
@@ -308,30 +374,46 @@ def update_teacher_student(
     teacher_name: str
 ):
     """
-    แก้ไขข้อมูลนักศึกษา
-    โดยอาจารย์แก้ได้เฉพาะนักศึกษาที่ตัวเองดูแล
+    Teacher แก้ไขได้เฉพาะนักศึกษาของตัวเอง
     """
 
     db_teacher_student = db.query(
         models.TeacherStudent
     ).filter(
-        models.TeacherStudent.id == teacher_student_id,
-        models.TeacherStudent.teacher_name == teacher_name
+        models.TeacherStudent.id ==
+        teacher_student_id,
+        models.TeacherStudent.teacher_name ==
+        teacher_name
     ).first()
 
     if not db_teacher_student:
         return None
 
-    # --------------------------------------------------------
     # ไม่ให้เปลี่ยน teacher_name
-    # --------------------------------------------------------
 
-    db_teacher_student.company_name = teacher_student.company_name
-    db_teacher_student.student_id = teacher_student.student_id
-    db_teacher_student.student_name = teacher_student.student_name
-    db_teacher_student.department = teacher_student.department
-    db_teacher_student.industry = teacher_student.industry
-    db_teacher_student.work_modes = teacher_student.work_modes
+    db_teacher_student.company_name = (
+        teacher_student.company_name
+    )
+
+    db_teacher_student.student_id = (
+        teacher_student.student_id
+    )
+
+    db_teacher_student.student_name = (
+        teacher_student.student_name
+    )
+
+    db_teacher_student.department = (
+        teacher_student.department
+    )
+
+    db_teacher_student.industry = (
+        teacher_student.industry
+    )
+
+    db_teacher_student.work_modes = (
+        teacher_student.work_modes
+    )
 
     db.commit()
     db.refresh(db_teacher_student)
@@ -345,15 +427,16 @@ def delete_teacher_student(
     teacher_name: str
 ):
     """
-    ลบนักศึกษาออกจากรายชื่อที่อาจารย์ดูแล
-    โดยลบได้เฉพาะของตัวเอง
+    Teacher ลบได้เฉพาะนักศึกษาของตัวเอง
     """
 
     db_teacher_student = db.query(
         models.TeacherStudent
     ).filter(
-        models.TeacherStudent.id == teacher_student_id,
-        models.TeacherStudent.teacher_name == teacher_name
+        models.TeacherStudent.id ==
+        teacher_student_id,
+        models.TeacherStudent.teacher_name ==
+        teacher_name
     ).first()
 
     if not db_teacher_student:
@@ -376,7 +459,8 @@ def get_student_teacher(
     return db.query(
         models.TeacherStudent
     ).filter(
-        models.TeacherStudent.student_name == student_name
+        models.TeacherStudent.student_name ==
+        student_name
     ).all()
 
 
@@ -388,7 +472,6 @@ def create_application(
     db: Session,
     application
 ):
-
     db_application = models.Application(
         student_id=application.student_id,
         company_id=application.company_id,
@@ -402,8 +485,9 @@ def create_application(
     return db_application
 
 
-def get_applications(db: Session):
-
+def get_applications(
+    db: Session
+):
     applications = db.query(
         models.Application
     ).all()
@@ -412,70 +496,55 @@ def get_applications(db: Session):
 
     for application in applications:
 
-        # ----------------------------------------------------
-        # application.student_id
-        # เก็บ "รหัสนักศึกษา"
-        # เช่น 65100521
-        # ----------------------------------------------------
+        student = db.query(
+            models.Student
+        ).filter(
+            models.Student.id ==
+            application.student_id
+        ).first()
 
-        student = (
-            db.query(models.Student)
-            .filter(
-                models.Student.student_id ==
-                application.student_id
-            )
-            .first()
-        )
-
-        # ----------------------------------------------------
-        # application.company_id
-        # เก็บ companies.id
-        # ----------------------------------------------------
-
-        company = (
-            db.query(models.Company)
-            .filter(
-                models.Company.id ==
-                application.company_id
-            )
-            .first()
-        )
+        company = db.query(
+            models.Company
+        ).filter(
+            models.Company.id ==
+            application.company_id
+        ).first()
 
         results.append({
 
-            "application_id": application.id,
+            "application_id":
+                application.id,
 
-            "student_id": (
+            "student_id":
                 student.student_id
                 if student
-                else application.student_id
-            ),
+                else None,
 
-            "first_name": (
+            "first_name":
                 student.first_name
                 if student
-                else None
-            ),
+                else None,
 
-            "last_name": (
+            "last_name":
                 student.last_name
                 if student
-                else None
-            ),
+                else None,
 
-            "student_name": (
-                f"{student.first_name} {student.last_name}"
+            "student_name":
+                (
+                    f"{student.first_name} "
+                    f"{student.last_name}"
+                )
                 if student
-                else None
-            ),
+                else None,
 
-            "company_name": (
+            "company_name":
                 company.company_name
                 if company
-                else None
-            ),
+                else None,
 
-            "status": application.status
+            "status":
+                application.status
         })
 
     return results
@@ -486,11 +555,11 @@ def update_application_status(
     application_id,
     status
 ):
-
     application = db.query(
         models.Application
     ).filter(
-        models.Application.id == application_id
+        models.Application.id ==
+        application_id
     ).first()
 
     if not application:
@@ -512,14 +581,20 @@ def create_supervision(
     db: Session,
     supervision
 ):
-
     db_supervision = models.Supervision(
+
         teacher_id=supervision.teacher_id,
+
         student_id=supervision.student_id,
+
         company_id=supervision.company_id,
+
         date=supervision.date,
+
         type=supervision.type,
+
         note=supervision.note,
+
         status=supervision.status
     )
 
@@ -530,17 +605,39 @@ def create_supervision(
     return db_supervision
 
 
-def get_supervisions(db: Session):
-
+def get_supervisions(
+    db: Session
+):
     return db.query(
         models.Supervision
     ).all()
 
 
+# ============================================================
+# TEACHER SUPERVISIONS
+# ============================================================
+
 def get_teacher_supervisions(
     db: Session,
-    teacher_id: int
+    teacher_name: str
 ):
+    """
+    ดึงประวัติการนิเทศของนักศึกษาที่อาจารย์คนนี้ดูแล
+
+    ความสัมพันธ์:
+
+    teacher_students.student_id
+                ↓
+    students.student_id
+                ↓
+    students.id
+                ↓
+    supervisions.student_id
+
+    และกรองด้วย:
+
+    teacher_students.teacher_name
+    """
 
     rows = db.query(
 
@@ -552,54 +649,68 @@ def get_teacher_supervisions(
             "teacher_last_name"
         ),
 
-        models.Company.company_name,
-
-        models.Company.industry,
-
-        models.Student.student_id,
-
-        models.Student.first_name.label(
-            "student_first_name"
+        models.TeacherStudent.student_id.label(
+            "assigned_student_id"
         ),
 
-        models.Student.last_name.label(
-            "student_last_name"
+        models.TeacherStudent.student_name.label(
+            "assigned_student_name"
+        ),
+
+        models.TeacherStudent.company_name.label(
+            "assigned_company_name"
+        ),
+
+        models.TeacherStudent.industry.label(
+            "assigned_industry"
         ),
 
         models.Supervision.date,
 
         models.Supervision.type,
 
-        models.Supervision.status
+        models.Supervision.status,
+
+        models.Supervision.note
 
     ).join(
 
-        models.Teacher,
-        models.Supervision.teacher_id ==
-        models.Teacher.id
+        models.TeacherStudent,
+
+        models.TeacherStudent.student_id ==
+        models.Student.student_id
 
     ).join(
 
-        models.Student,
+        models.Supervision,
+
         models.Supervision.student_id ==
         models.Student.id
 
     ).join(
 
-        models.Company,
-        models.Supervision.company_id ==
-        models.Company.id
+        models.Teacher,
+
+        models.Supervision.teacher_id ==
+        models.Teacher.id
 
     ).filter(
 
-        models.Teacher.id == teacher_id
+        models.TeacherStudent.teacher_name ==
+        teacher_name
+
+    ).filter(
+
+        models.Teacher.first_name +
+        " " +
+        models.Teacher.last_name ==
+        teacher_name
 
     ).all()
 
 
     # ========================================================
-    # แปลง SQLAlchemy Row -> Dictionary
-    # เพื่อให้ FastAPI ส่ง JSON ได้
+    # แปลง SQLAlchemy Row เป็น JSON
     # ========================================================
 
     result = []
@@ -608,58 +719,49 @@ def get_teacher_supervisions(
 
         result.append({
 
-            "teacher_name": (
+            "teacher_name":
                 f"{row.teacher_first_name} "
-                f"{row.teacher_last_name}"
-            ),
+                f"{row.teacher_last_name}",
 
-            "company_name": row.company_name,
+            "student_id":
+                row.assigned_student_id,
 
-            "industry": row.industry,
+            "student_name":
+                row.assigned_student_name,
 
-            "student_id": row.student_id,
+            "company_name":
+                row.assigned_company_name,
 
-            "student_name": (
-                f"{row.student_first_name} "
-                f"{row.student_last_name}"
-            ),
+            "industry":
+                row.assigned_industry,
 
-            "date": row.date,
+            "date":
+                row.date,
 
-            "type": row.type,
+            "type":
+                row.type,
 
-            "status": row.status
+            "status":
+                row.status,
+
+            "note":
+                row.note
         })
-
 
     return result
 
-
-# ============================================================
-# TEACHER SUPERVISION BY TEACHER NAME
-# ============================================================
 
 def get_teacher_supervisions_by_name(
     db: Session,
     teacher_name: str
 ):
-
-    teacher = db.query(
-        models.Teacher
-    ).filter(
-        (
-            models.Teacher.first_name +
-            " " +
-            models.Teacher.last_name
-        ) == teacher_name
-    ).first()
-
-    if not teacher:
-        return []
+    """
+    ใช้ teacher_name เป็นตัวกำหนดอาจารย์
+    """
 
     return get_teacher_supervisions(
         db,
-        teacher.id
+        teacher_name
     )
 
 
@@ -671,6 +773,20 @@ def teacher_dashboard(
     db: Session,
     teacher_name: str
 ):
+    """
+    Dashboard ของ Teacher
+
+    students:
+        จำนวนคนที่อาจารย์ดูแล
+        จาก teacher_students
+
+    supervision_count:
+        จำนวนการนิเทศของอาจารย์
+
+    supervisions:
+        ประวัติการนิเทศ
+        ของนักศึกษาที่อาจารย์ดูแล
+    """
 
     # --------------------------------------------------------
     # นักศึกษาที่อาจารย์ดูแล
@@ -690,33 +806,47 @@ def teacher_dashboard(
     ).filter(
         models.Teacher.first_name +
         " " +
-        models.Teacher.last_name == teacher_name
+        models.Teacher.last_name ==
+        teacher_name
     ).first()
-
-    # --------------------------------------------------------
-    # จำนวนการนิเทศ
-    # --------------------------------------------------------
 
     supervision_count = 0
     supervisions = []
 
     if teacher:
 
+        # ----------------------------------------------------
+        # จำนวน supervision
+        # ----------------------------------------------------
+
         supervision_count = db.query(
             models.Supervision
         ).filter(
-            models.Supervision.teacher_id == teacher.id
+            models.Supervision.teacher_id ==
+            teacher.id
         ).count()
+
+        # ----------------------------------------------------
+        # ประวัติ supervision
+        #
+        # อิง teacher_students
+        # ----------------------------------------------------
 
         supervisions = get_teacher_supervisions(
             db,
-            teacher.id
+            teacher_name
         )
 
     return {
-        "students": len(students),
-        "supervision_count": supervision_count,
-        "supervisions": supervisions
+
+        "students":
+            len(students),
+
+        "supervision_count":
+            supervision_count,
+
+        "supervisions":
+            supervisions
     }
 
 
@@ -727,24 +857,35 @@ def teacher_dashboard(
 def admin_dashboard(
     db: Session
 ):
-
     return {
 
-        "students": db.query(
-            func.count(models.Student.id)
-        ).scalar(),
+        "students":
+            db.query(
+                func.count(
+                    models.Student.id
+                )
+            ).scalar(),
 
-        "companies": db.query(
-            func.count(models.Company.id)
-        ).scalar(),
+        "companies":
+            db.query(
+                func.count(
+                    models.Company.id
+                )
+            ).scalar(),
 
-        "applications": db.query(
-            func.count(models.Application.id)
-        ).scalar(),
+        "applications":
+            db.query(
+                func.count(
+                    models.Application.id
+                )
+            ).scalar(),
 
-        "supervisions": db.query(
-            func.count(models.Supervision.id)
-        ).scalar()
+        "supervisions":
+            db.query(
+                func.count(
+                    models.Supervision.id
+                )
+            ).scalar()
     }
 
 
@@ -756,24 +897,31 @@ def create_company(
     db: Session,
     company
 ):
-
     db_company = models.Company(
 
-        company_name=company.company_name,
+        company_name=
+            company.company_name,
 
-        address=company.address,
+        address=
+            company.address,
 
-        county=company.county,
+        county=
+            company.county,
 
-        industry=company.industry,
+        industry=
+            company.industry,
 
-        allowance=company.allowance,
+        allowance=
+            company.allowance,
 
-        accommodation=company.accommodation,
+        accommodation=
+            company.accommodation,
 
-        shuttle=company.shuttle,
+        shuttle=
+            company.shuttle,
 
-        welfare=company.welfare
+        welfare=
+            company.welfare
     )
 
     db.add(db_company)
@@ -873,7 +1021,8 @@ def get_companies(
     if shuttle:
 
         query = query.filter(
-            models.Company.shuttle == shuttle
+            models.Company.shuttle ==
+            shuttle
         )
 
     return query.all()
@@ -894,14 +1043,37 @@ def update_company(
     if not db_company:
         return None
 
-    db_company.company_name = company.company_name
-    db_company.address = company.address
-    db_company.county = company.county
-    db_company.industry = company.industry
-    db_company.allowance = company.allowance
-    db_company.accommodation = company.accommodation
-    db_company.shuttle = company.shuttle
-    db_company.welfare = company.welfare
+    db_company.company_name = (
+        company.company_name
+    )
+
+    db_company.address = (
+        company.address
+    )
+
+    db_company.county = (
+        company.county
+    )
+
+    db_company.industry = (
+        company.industry
+    )
+
+    db_company.allowance = (
+        company.allowance
+    )
+
+    db_company.accommodation = (
+        company.accommodation
+    )
+
+    db_company.shuttle = (
+        company.shuttle
+    )
+
+    db_company.welfare = (
+        company.welfare
+    )
 
     db.commit()
     db.refresh(db_company)
