@@ -352,8 +352,25 @@ def teacher_dashboard(
 @app.get("/teacher/supervisions")
 def teacher_supervisions(
     db: Session = Depends(get_db),
-    user=Depends(require_role("teacher"))
+    user=Depends(get_current_user)
 ):
+
+    # =========================
+    # ADMIN
+    # =========================
+
+    if user["role"] == "admin":
+        return crud.get_all_supervisions(db)
+
+    # =========================
+    # TEACHER
+    # =========================
+
+    if user["role"] != "teacher":
+        raise HTTPException(
+            status_code=403,
+            detail="Permission denied"
+        )
 
     teacher = crud.get_teacher_by_username(
         db,
