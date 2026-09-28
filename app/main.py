@@ -308,7 +308,17 @@ def read_supervision(
     user=Depends(require_role("teacher"))
 ):
     return crud.get_supervisions(db)
+    
+# ======================
+# ADMIN SUPERVISIONS
+# ======================
 
+@app.get("/admin/supervisions")
+def admin_supervisions(
+    db: Session = Depends(get_db),
+    user=Depends(require_role("admin"))
+):
+    return crud.get_all_supervisions(db)
 
 # ======================
 # TEACHER
