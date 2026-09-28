@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+    from pydantic import BaseModel
 from datetime import date
 from typing import List
 
@@ -78,7 +78,6 @@ class StudentUpdate(BaseModel):
     last_name: str
     faculty: str
     major: str
-    username: str
     phone: str
     semester: str
 
