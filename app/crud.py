@@ -579,22 +579,73 @@ def update_application_status(
 
 def create_supervision(
     db: Session,
-    supervision
+    supervision,
+    teacher
 ):
+    # ========================================================
+    # 1. หา teacher จาก username ที่ Login อยู่
+    # ========================================================
+
+    db_teacher = db.query(
+        models.Teacher
+    ).filter(
+        models.Teacher.username == teacher["sub"]
+    ).first()
+
+    if not db_teacher:
+        return None, "Teacher not found"
+
+    teacher_name = (
+        f"{db_teacher.first_name} "
+        f"{db_teacher.last_name}"
+    )
+
+    # ========================================================
+    # 2. ตรวจว่านักศึกษาคนนี้อยู่ใน teacher_students
+    #    ของอาจารย์คนนี้จริงหรือไม่
+    # ========================================================
+
+    assigned_student = db.query(
+        models.TeacherStudent
+    ).filter(
+        models.TeacherStudent.teacher_name
+        == teacher_name,
+
+        models.TeacherStudent.student_id
+        == supervision.student_id
+    ).first()
+
+    if not assigned_student:
+        return None, "Student is not assigned to this teacher"
+
+    # ========================================================
+    # 3. หา Student จาก student_id
+    #    เช่น 65123481
+    # ========================================================
+
+    db_student = db.query(
+        models.Student
+    ).filter(
+        models.Student.student_id
+        == supervision.student_id
+    ).first()
+
+    if not db_student:
+        return None, "Student not found"
+
+    # ========================================================
+    # 4. สร้าง supervision
+    #
+    # student_id ใน supervisions ต้องใช้ students.id
+    # ========================================================
+
     db_supervision = models.Supervision(
-
-        teacher_id=supervision.teacher_id,
-
-        student_id=supervision.student_id,
-
+        teacher_id=db_teacher.id,
+        student_id=db_student.id,
         company_id=supervision.company_id,
-
         date=supervision.date,
-
         type=supervision.type,
-
         note=supervision.note,
-
         status=supervision.status
     )
 
@@ -602,7 +653,7 @@ def create_supervision(
     db.commit()
     db.refresh(db_supervision)
 
-    return db_supervision
+    return db_supervision, None
 
 
 def get_supervisions(
