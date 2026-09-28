@@ -723,6 +723,68 @@ def get_teacher_supervisions(db: Session, teacher_name: str):
 
     return result
 
+def get_all_supervisions(db: Session):
+
+    rows = db.query(
+        models.Supervision.id.label("supervision_id"),
+
+        models.Teacher.first_name.label("teacher_first_name"),
+        models.Teacher.last_name.label("teacher_last_name"),
+
+        models.Student.student_id.label("student_id"),
+        models.Student.first_name.label("student_first_name"),
+        models.Student.last_name.label("student_last_name"),
+
+        models.Company.company_name.label("company_name"),
+        models.Company.industry.label("industry"),
+
+        models.Supervision.date.label("date"),
+        models.Supervision.type.label("type"),
+        models.Supervision.status.label("status"),
+        models.Supervision.note.label("note")
+
+    ).join(
+        models.Teacher,
+        models.Supervision.teacher_id == models.Teacher.id
+    ).join(
+        models.Student,
+        models.Supervision.student_id == models.Student.id
+    ).join(
+        models.Company,
+        models.Supervision.company_id == models.Company.id
+    ).order_by(
+        models.Supervision.date.desc()
+    ).all()
+
+    result = []
+
+    for row in rows:
+        result.append({
+            "supervision_id": row.supervision_id,
+
+            "teacher_name": (
+                f"{row.teacher_first_name} "
+                f"{row.teacher_last_name}"
+            ),
+
+            "student_id": row.student_id,
+
+            "student_name": (
+                f"{row.student_first_name} "
+                f"{row.student_last_name}"
+            ),
+
+            "company_name": row.company_name,
+            "industry": row.industry,
+
+            "date": row.date,
+            "type": row.type,
+            "status": row.status,
+            "note": row.note
+        })
+
+    return result
+
 # ============================================================
 # TEACHER DASHBOARD
 # ============================================================
