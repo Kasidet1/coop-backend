@@ -617,37 +617,11 @@ def get_supervisions(
 # TEACHER SUPERVISIONS
 # ============================================================
 
-def get_teacher_supervisions(
-    db: Session,
-    teacher_name: str
-):
-    """
-    ดึงประวัติการนิเทศของนักศึกษาที่อาจารย์คนนี้ดูแล
-
-    ความสัมพันธ์:
-
-    teacher_students.student_id
-                ↓
-    students.student_id
-                ↓
-    students.id
-                ↓
-    supervisions.student_id
-
-    และกรองด้วย:
-
-    teacher_students.teacher_name
-    """
+def get_teacher_supervisions(db: Session, teacher_name: str):
 
     rows = db.query(
-
-        models.Teacher.first_name.label(
-            "teacher_first_name"
-        ),
-
-        models.Teacher.last_name.label(
-            "teacher_last_name"
-        ),
+        models.Teacher.first_name.label("teacher_first_name"),
+        models.Teacher.last_name.label("teacher_last_name"),
 
         models.TeacherStudent.student_id.label(
             "assigned_student_id"
@@ -666,86 +640,64 @@ def get_teacher_supervisions(
         ),
 
         models.Supervision.date,
-
         models.Supervision.type,
-
         models.Supervision.status,
-
         models.Supervision.note
 
-    ).join(
-
-        models.TeacherStudent,
-
-        models.TeacherStudent.student_id ==
-        models.Student.student_id
+    ).select_from(
+        models.TeacherStudent
 
     ).join(
+        models.Student,
+        models.TeacherStudent.student_id
+        == models.Student.student_id
 
+    ).join(
         models.Supervision,
-
-        models.Supervision.student_id ==
-        models.Student.id
+        models.Supervision.student_id
+        == models.Student.id
 
     ).join(
-
         models.Teacher,
-
-        models.Supervision.teacher_id ==
-        models.Teacher.id
-
-    ).filter(
-
-        models.TeacherStudent.teacher_name ==
-        teacher_name
+        models.Supervision.teacher_id
+        == models.Teacher.id
 
     ).filter(
+        models.TeacherStudent.teacher_name
+        == teacher_name
 
-        models.Teacher.first_name +
-        " " +
-        models.Teacher.last_name ==
-        teacher_name
+    ).filter(
+        models.Teacher.first_name
+        + " "
+        + models.Teacher.last_name
+        == teacher_name
 
     ).all()
-
-
-    # ========================================================
-    # แปลง SQLAlchemy Row เป็น JSON
-    # ========================================================
 
     result = []
 
     for row in rows:
-
         result.append({
-
-            "teacher_name":
+            "teacher_name": (
                 f"{row.teacher_first_name} "
-                f"{row.teacher_last_name}",
+                f"{row.teacher_last_name}"
+            ),
 
-            "student_id":
-                row.assigned_student_id,
+            "student_id": row.assigned_student_id,
 
-            "student_name":
-                row.assigned_student_name,
+            "student_name": row.assigned_student_name,
 
-            "company_name":
-                row.assigned_company_name,
+            "company_name": row.assigned_company_name,
 
-            "industry":
-                row.assigned_industry,
+            "industry": row.assigned_industry,
 
-            "date":
-                row.date,
+            "date": row.date,
 
-            "type":
-                row.type,
+            "type": row.type,
 
-            "status":
-                row.status,
+            "status": row.status,
 
-            "note":
-                row.note
+            "note": row.note
         })
 
     return result
