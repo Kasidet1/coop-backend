@@ -172,10 +172,8 @@ class Application(BaseModel):
 # ======================
 
 class SupervisionCreate(BaseModel):
-    teacher_id: int
-    student_id: int
+    student_id: str
     company_id: int
-
     date: date
     type: str
     note: str
