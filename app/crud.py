@@ -652,11 +652,9 @@ def teacher_dashboard(
     teacher = db.query(
         models.Teacher
     ).filter(
-        (
-            models.Teacher.first_name +
-            " " +
-            models.Teacher.last_name
-        ) == teacher_name
+        models.Teacher.first_name +
+        " " +
+        models.Teacher.last_name == teacher_name
     ).first()
 
     # --------------------------------------------------------
@@ -664,7 +662,6 @@ def teacher_dashboard(
     # --------------------------------------------------------
 
     supervision_count = 0
-
     supervisions = []
 
     if teacher:
@@ -681,11 +678,8 @@ def teacher_dashboard(
         )
 
     return {
-
         "students": len(students),
-
         "supervision_count": supervision_count,
-
         "supervisions": supervisions
     }
 
